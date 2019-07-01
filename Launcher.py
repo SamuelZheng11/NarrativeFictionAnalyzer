@@ -14,10 +14,9 @@ if __name__ == '__main__':
               "country is from Kansas!\" Dorothy cried. \"I have never seen such a beautiful place. Where am I ? "
               "And how did I get here?\"");
 
-    #doc.sentences[0].print_dependencies();
-
     model = Model()
     analyser = Analyser(model)
-    analyser.processSentence(doc.sentences[0])
+    for sentence in doc.sentences:
+        analyser.processSentence(sentence._words)
     item = model.getEntities()
     print(item)

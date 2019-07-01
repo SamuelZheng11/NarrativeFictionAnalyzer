@@ -10,5 +10,5 @@ class Analyser:
 
     def processSentence(self, wordArray):
         for wordInfo in wordArray:
-            if wordInfo[0] == "nsubj":
-                self.model.addEntity(wordInfo[0])
+            if wordInfo._dependency_relation == "nsubj" and wordInfo._upos == "PROPN":
+                self.model.addEntity(wordInfo._lemma)

@@ -9,9 +9,12 @@ class Model:
     scenes = []
 
     def addEntity(self, name):
+
         for entity in self.entities:
-            if entity.name != name:
-                self.entities.append(Entity(name))
+            if entity.name == name:
+                return;
+
+        self.entities.append(Entity(name));
 
     def getEntities(self):
         return self.entities
