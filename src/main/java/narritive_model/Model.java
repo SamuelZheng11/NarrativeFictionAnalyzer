@@ -1,5 +1,7 @@
 package narritive_model;
 
+import edu.stanford.nlp.pipeline.CoreEntityMention;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,5 +12,9 @@ public class Model {
     private Set<Scene> scenes = new HashSet<Scene>();
 
 
-
+    public Entity addEntity(CoreEntityMention em) {
+        Entity newEntity = new Entity(em.text());
+        this.entities.add(newEntity);
+        return newEntity;
+    }
 }

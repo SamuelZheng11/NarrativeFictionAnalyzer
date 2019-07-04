@@ -1,11 +1,15 @@
 package launcher;
 
-import narritive_analyser.Analyser;
+import narritive_processing.Analyser;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.pipeline.*;
 import narritive_model.Model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class Launcher {
@@ -17,15 +21,15 @@ public class Launcher {
 
         // Prepare objects and paragraph for processing
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        CoreDocument doc = new CoreDocument("Lyman Frank Baum was born in 1856 near Syracuse, in New York " +
+        CoreDocument document = new CoreDocument("Lyman Frank Baum was born in 1856 near Syracuse, in New York " +
                 "State, in the Eastern part of the United States. His father made a lot of money in the oil business " +
                 "and Frank grew up with his brothers and sisters in a beautiful house in the countryside.");
         Model model = new Model();
         Analyser analyser = new Analyser(model);
 
-        pipeline.annotate(doc);
+        pipeline.annotate(document);
 
-        List<?> entities = doc.entityMentions();
+        analyser.processParagraph(document);
         System.exit(0);
     }
 }
