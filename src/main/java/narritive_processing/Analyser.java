@@ -16,8 +16,11 @@ public class Analyser {
         for (CoreEntityMention em : document.entityMentions()) {
             System.out.println(em.entityTypeConfidences());
             if(em.entityType().equals("PERSON") && !em.entityTypeConfidences().containsKey("O")) {
-                if (!this.currentContext.getEntity().getName().contains(em.text()))
+                if (!this.currentContext.getEntity().getName().contains(em.text())) {
                     this.setContext(this.model.addEntity(em), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
+                } else {
+                    model.addAlias(this.currentContext.getEntity().getName(), em.text());
+                }
             }
         }
     }

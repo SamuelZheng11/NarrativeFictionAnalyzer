@@ -17,4 +17,12 @@ public class Model {
         this.entities.add(newEntity);
         return newEntity;
     }
+
+    public void addAlias(String entityName, String alias) {
+        for (Entity entity : this.entities) {
+            if(entity.getName() == entityName) {
+                entity.addAlias(alias);
+            }
+        }
+    }
 }

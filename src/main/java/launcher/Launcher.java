@@ -3,13 +3,7 @@ package launcher;
 import narritive_processing.Analyser;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.pipeline.*;
 import narritive_model.Model;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class Launcher {
