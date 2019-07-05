@@ -8,6 +8,15 @@ public class Relationship {
     private Entity objectEntity;
     Set<String> description = new HashSet<String>();
     boolean bidirectional = false;
+    private BookLocation location;
+
+    public Relationship(Entity subjectEntity, Entity objectEntity, Set<String> description, boolean bidirectional, BookLocation location) {
+        this.subjectEntity = subjectEntity;
+        this.objectEntity = objectEntity;
+        this.description = description;
+        this.bidirectional = bidirectional;
+        this.location = location;
+    }
 
     public void setBidirectional() {
         this.bidirectional = true;
