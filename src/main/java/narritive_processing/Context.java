@@ -1,9 +1,6 @@
 package narritive_processing;
 
-import narritive_model.Entity;
-import narritive_model.Location;
-import narritive_model.Relationship;
-import narritive_model.Scene;
+import narritive_model.*;
 
 public class Context {
     private static Context context;
@@ -11,6 +8,7 @@ public class Context {
     private static Relationship relationship;
     private static Location location;
     private static Scene scene;
+    private int segmentsAnalysed = 0;
 
     public static Context getContext() {
         if (context == null) {
@@ -23,8 +21,8 @@ public class Context {
     private Context() {
         this.entity = new Entity("");
         this.location = new Location("");
-        this.relationship = new Relationship();
-        this.scene = new Scene();
+        this.relationship = null;
+        this.scene = new Scene(new BookLocation(this.segmentsAnalysed, 0, 0));
     }
 
     public void setContext(Entity entity, Location location, Relationship relationship, Scene scene) {
@@ -50,4 +48,11 @@ public class Context {
         return scene;
     }
 
+    public int getSegmentsAnalysed() {
+        return segmentsAnalysed;
+    }
+
+    public void setSegmentsAnalysed(int segmentsAnalysed) {
+        this.segmentsAnalysed = segmentsAnalysed;
+    }
 }

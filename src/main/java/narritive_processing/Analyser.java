@@ -7,14 +7,15 @@ import narritive_model.*;
 public class Analyser {
     private Model model;
     private Context currentContext = Context.getContext();
+    private int segmentsAnalysed = 0;
 
     public Analyser(Model model) {
         this.model = model;
     }
 
     public void processParagraph(CoreDocument document) {
+        this.currentContext.setSegmentsAnalysed(this.segmentsAnalysed);
         for (CoreEntityMention em : document.entityMentions()) {
-            System.out.println(em.entityTypeConfidences());
             if(em.entityType().equals("PERSON") && !em.entityTypeConfidences().containsKey("O")) {
                 if (!this.currentContext.getEntity().getName().contains(em.text())) {
                     this.setContext(this.model.addEntity(em), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
@@ -23,6 +24,7 @@ public class Analyser {
                 }
             }
         }
+        this.segmentsAnalysed++;
     }
 
     private void setContext(Entity entity, Location location, Relationship relationship, Scene scene) {
