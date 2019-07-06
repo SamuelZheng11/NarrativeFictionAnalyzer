@@ -37,4 +37,8 @@ public class Model {
             return null;
         }
     }
+
+    public void addScene(Scene scene) {
+        this.scenes.add(scene);
+    }
 }
