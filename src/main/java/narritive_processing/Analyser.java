@@ -16,6 +16,14 @@ public class Analyser {
     public void processParagraph(CoreDocument document) {
         this.currentContext.setSegmentsAnalysed(this.segmentsAnalysed);
         Scene current_scene = new Scene(new BookLocation(segmentsAnalysed, 0, 0));
+
+        this.processEntities(document, current_scene);
+        
+        this.sceneMerge(current_scene);
+        this.segmentsAnalysed++;
+    }
+
+    private void processEntities(CoreDocument document, Scene current_scene){
         for (CoreEntityMention em : document.entityMentions()) {
             if(em.entityType().equals("PERSON") && !em.entityTypeConfidences().containsKey("O")) {
                 // if the model does not contain this character, add it
@@ -31,8 +39,6 @@ public class Analyser {
                 }
             }
         }
-        this.sceneMerge(current_scene);
-        this.segmentsAnalysed++;
     }
 
     private void sceneMerge(Scene current_scene){
