@@ -6,6 +6,7 @@ import edu.stanford.nlp.pipeline.CoreEntityMention;
 import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import narritive_model.*;
 
 import java.util.ArrayList;
@@ -18,19 +19,20 @@ public class Analyser {
     private int segmentsAnalysed = 0;
 
     private static String adjective_tag = "JJ";
-    private static String[] relative_adjective_tags = {"JJR", "JJS"};
-    private static List<String> noun_group_tags = Arrays.asList(new String[]{"NN", "NNS", "NNP", "NNPS", "PRP"});
-    private static List<String> noun_tags = Arrays.asList(new String[]{"NN", "NNS", "NNP", "NNPS"});
-    private static List<String> adverb_tags = Arrays.asList(new String[]{"RB", "RBS"});
-    private static String[] comp_relations = {"ccomp", "xcomp"};
-    private static String adverbial_modifier_relation = "advmod";
+    private static List<String> noun_group_tags = Arrays.asList("NN", "NNS", "NNP", "NNPS", "PRP");
+    private static List<String> noun_tags = Arrays.asList("NN", "NNS", "NNP", "NNPS");
+    private static List<String> preferred_noun_tags = Arrays.asList("NNP", "NNPS", "PRP");
+    private static List<String> adverb_tags = Arrays.asList("RB", "RBS");
     private static String adjectival_modifier_relation = "amod";
+    private static String noun_subject_relation = "nsubj";
     private static String relative_clause_relation = "acl:relcl";
+	private static List<String> adjective_relationsihps_to_dismiss = Arrays.asList("dobj", "xcomp", "ccomp", "nmod", "acl", "advmod", "advcl");
+	private static List<String> noun_relationsihps_to_dismiss = Arrays.asList("conj");
 
 
 
 
-    public Analyser(Model model) {
+	public Analyser(Model model) {
         this.model = model;
     }
 
@@ -40,8 +42,14 @@ public class Analyser {
 
         this.processEntities(document, current_scene);
         for (CoreSentence sentence : document.sentences()) {
-            System.out.println(sentence.text());
-            this.findModifiers(sentence.dependencyParse());
+			List<IndexedWord[]> sentenceModifiers = this.findModifiers(sentence.dependencyParse());
+            if (!sentenceModifiers.isEmpty()){
+            	System.out.println();
+				System.out.println(sentence.text());
+				for (IndexedWord[] pair : sentenceModifiers){
+					System.out.println(pair[0] + ": " + pair[1]);
+				}
+			}
         }
 
             this.sceneMerge(current_scene);
@@ -98,22 +106,20 @@ public class Analyser {
                     // TODO: merge with parent if JJ*
                 }
 
-                List<IndexedWord> nounCandidates = new ArrayList<IndexedWord>();
+                List<NounCandidate> nounCandidates = new ArrayList<NounCandidate>();
 
                 //Check children for noun candidates
                 List<SemanticGraphEdge> outgoingEdges = dependencies.getOutEdgesSorted(word.getTarget());
                 for (SemanticGraphEdge edge : outgoingEdges){
                     if (noun_group_tags.contains(edge.getTarget().tag())){
-                        nounCandidates.add(edge.getTarget());
+                        nounCandidates.add(new NounCandidate(edge.getTarget(), edge.getRelation()));
                     }
                 }
                 if (!nounCandidates.isEmpty()){
-                    IndexedWord candidate = this.pickCandidate(nounCandidates);
-                    System.out.println(word.getTarget());
-                    for (IndexedWord guy : nounCandidates){
-                        System.out.print(guy.word() + ", ");
-                    }
-                    //TODO ADD TO MODIFIERS
+                    IndexedWord candidate = this.pickCandidate(nounCandidates, word);
+                    if (candidate != null){
+						modifiers.add(new IndexedWord[]{word.getTarget(), candidate});
+					}
                     continue;
                 }
 
@@ -121,16 +127,14 @@ public class Analyser {
                 List<SemanticGraphEdge> incomingEdges = dependencies.getIncomingEdgesSorted(word.getTarget());
                 for (SemanticGraphEdge incomingEdge : incomingEdges){
                     if (noun_group_tags.contains(incomingEdge.getSource().tag())){
-                        nounCandidates.add(incomingEdge.getSource());
+                        nounCandidates.add(new NounCandidate(incomingEdge.getSource(), incomingEdge.getRelation()));
                     }
                 }
                 if (!nounCandidates.isEmpty()){
-                    IndexedWord candidate = this.pickCandidate(nounCandidates);
-                    System.out.println(word.getTarget());
-                    for (IndexedWord guy : nounCandidates){
-                        System.out.print(guy.word() + ", ");
-                    }
-                    //TODO ADD TO MODIFIERS
+                    IndexedWord candidate = this.pickCandidate(nounCandidates, word);
+					if (candidate != null){
+						modifiers.add(new IndexedWord[]{word.getTarget(), candidate});
+					}
                     continue;
                 }
 
@@ -139,17 +143,15 @@ public class Analyser {
                     List<SemanticGraphEdge> outgoingEdgesFromParent = dependencies.getOutEdgesSorted(parentEdge.getSource());
                     for (SemanticGraphEdge siblingEdge : outgoingEdgesFromParent){
                         if (noun_group_tags.contains(siblingEdge.getTarget().tag())){
-                            nounCandidates.add(siblingEdge.getTarget());
+                            nounCandidates.add(new NounCandidate(siblingEdge.getTarget(), siblingEdge.getRelation()));
                         }
                     }
                 }
                 if (!nounCandidates.isEmpty()){
-                    IndexedWord candidate = this.pickCandidate(nounCandidates);
-                    System.out.println(word.getTarget());
-                    for (IndexedWord guy : nounCandidates){
-                        System.out.print(guy.word() + ", ");
-                    }
-                    //TODO ADD TO MODIFIERS
+                    IndexedWord candidate = this.pickCandidate(nounCandidates, word);
+					if (candidate != null){
+						modifiers.add(new IndexedWord[]{word.getTarget(), candidate});
+					}
                     continue;
                 }
             }else if (adverb_tags.contains(relation)){
@@ -161,8 +163,64 @@ public class Analyser {
         return modifiers;
     }
 
-    private IndexedWord pickCandidate(List<IndexedWord> nounCandidates){
-        //TODO: Pick candidate
-        return null;
+    private IndexedWord pickCandidate(List<NounCandidate> nounCandidates, SemanticGraphEdge word){
+        if (nounCandidates.size() == 1){
+            return nounCandidates.get(0).indexedWord;
+        }
+        //If the adjective is the wrong type it is irrelevant and should be ignored
+        for (String rel : adjective_relationsihps_to_dismiss){
+        	if (word.getRelation().toString().startsWith(rel)){
+        		return null;
+			}
+		}
+
+        NounCandidate bestCandidate = null;
+
+        for (NounCandidate candidate : nounCandidates){
+
+        	//If the noun is the wrong type it is not a candidate
+        	for (String rel : noun_relationsihps_to_dismiss) {
+				if (candidate.relation.toString().startsWith(rel)) {
+					continue;
+				}
+			}
+
+			//If this is the first viable candidate, set it
+			if (bestCandidate == null){
+				bestCandidate = candidate;
+				continue;
+			}
+
+			//If the candidate is a subject it is likely the best candidate
+			if(candidate.relation.toString().startsWith(noun_subject_relation)){
+				if (!bestCandidate.relation.toString().startsWith(noun_subject_relation)){
+					bestCandidate = candidate;
+					continue;
+				}
+				else{
+					//TODO: What if there are two subjects?
+					System.out.println(bestCandidate);
+					System.out.println(candidate);
+					continue;
+				}
+			}
+			//If neither the existing best nor the candidate are subjects, compare on if they have a preferred tag
+			if (!bestCandidate.relation.toString().startsWith(noun_subject_relation)){
+				if(!preferred_noun_tags.contains(bestCandidate.indexedWord.tag()) && preferred_noun_tags.contains(candidate.indexedWord.tag())){
+					bestCandidate = candidate;
+				}
+			}
+		}
+        return bestCandidate.indexedWord;
     }
+
+    private class NounCandidate{
+    	public GrammaticalRelation relation;
+    	public IndexedWord indexedWord;
+
+		public NounCandidate(IndexedWord word, GrammaticalRelation relationship) {
+			this.indexedWord = word;
+			this.relation = relationship;
+		}
+	}
 }
