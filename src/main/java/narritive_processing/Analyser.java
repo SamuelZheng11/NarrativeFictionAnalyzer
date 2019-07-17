@@ -42,13 +42,9 @@ public class Analyser {
 
         this.processEntities(document, current_scene);
         for (CoreSentence sentence : document.sentences()) {
-			List<IndexedWord[]> sentenceModifiers = this.findModifiers(sentence.dependencyParse());
-            if (!sentenceModifiers.isEmpty()){
-            	System.out.println();
-				System.out.println(sentence.text());
-				for (IndexedWord[] pair : sentenceModifiers){
-					System.out.println(pair[0] + ": " + pair[1]);
-				}
+			List<Modifier> sentenceModifiers = this.findModifiers(sentence.dependencyParse());
+			for (Modifier pair : sentenceModifiers){
+				System.out.println(pair.modifier + " " + pair.subject.word());
 			}
         }
 
@@ -89,12 +85,13 @@ public class Analyser {
         this.currentContext.setContext(entity, location, relationship, scene);
     }
 
-    private List<IndexedWord[]>  findModifiers(SemanticGraph dependencies){
-        List<IndexedWord[]> modifiers = new ArrayList<IndexedWord[]>();
+    private List<Modifier>  findModifiers(SemanticGraph dependencies){
+        List<Modifier> modifiers = new ArrayList<Modifier>();
 
         //get all word edges in the dep graph
         List<SemanticGraphEdge> words = dependencies.edgeListSorted();
         for (SemanticGraphEdge word : words){
+        	String altered_word = null;
 
             String relation = word.getRelation().getShortName();
             String tag = word.getTarget().tag();
@@ -103,7 +100,9 @@ public class Analyser {
             if (tag.equals(adjective_tag) || (relation.equals(relative_clause_relation) && noun_tags.contains(tag))){
 
                 if (relation.equals(adjectival_modifier_relation)){
-                    // TODO: merge with parent if JJ*
+                	if (word.getSource().tag().matches("JJ.")){
+						altered_word = word.getTarget().word() + word.getSource().word();
+					}
                 }
 
                 List<NounCandidate> nounCandidates = new ArrayList<NounCandidate>();
@@ -115,30 +114,20 @@ public class Analyser {
                         nounCandidates.add(new NounCandidate(edge.getTarget(), edge.getRelation()));
                     }
                 }
-                if (!nounCandidates.isEmpty()){
-                    IndexedWord candidate = this.pickCandidate(nounCandidates, word);
-                    if (candidate != null){
-						modifiers.add(new IndexedWord[]{word.getTarget(), candidate});
-					}
-                    continue;
-                }
+				if (addCandidate(modifiers, word, altered_word, nounCandidates))
+					continue;
 
-                //if no noun candidate check parents
+				//if no noun candidate check parents
                 List<SemanticGraphEdge> incomingEdges = dependencies.getIncomingEdgesSorted(word.getTarget());
                 for (SemanticGraphEdge incomingEdge : incomingEdges){
                     if (noun_group_tags.contains(incomingEdge.getSource().tag())){
                         nounCandidates.add(new NounCandidate(incomingEdge.getSource(), incomingEdge.getRelation()));
                     }
                 }
-                if (!nounCandidates.isEmpty()){
-                    IndexedWord candidate = this.pickCandidate(nounCandidates, word);
-					if (candidate != null){
-						modifiers.add(new IndexedWord[]{word.getTarget(), candidate});
-					}
-                    continue;
-                }
+				if (addCandidate(modifiers, word, altered_word, nounCandidates))
+					continue;
 
-                //finally check siblings
+				//finally check siblings
                 for (SemanticGraphEdge parentEdge : incomingEdges){
                     List<SemanticGraphEdge> outgoingEdgesFromParent = dependencies.getOutEdgesSorted(parentEdge.getSource());
                     for (SemanticGraphEdge siblingEdge : outgoingEdgesFromParent){
@@ -147,14 +136,9 @@ public class Analyser {
                         }
                     }
                 }
-                if (!nounCandidates.isEmpty()){
-                    IndexedWord candidate = this.pickCandidate(nounCandidates, word);
-					if (candidate != null){
-						modifiers.add(new IndexedWord[]{word.getTarget(), candidate});
-					}
-                    continue;
-                }
-            }else if (adverb_tags.contains(relation)){
+				if (addCandidate(modifiers, word, altered_word, nounCandidates))
+					continue;
+			}else if (adverb_tags.contains(relation)){
                 // TODO: adverb stuff
             }
         }
@@ -163,7 +147,21 @@ public class Analyser {
         return modifiers;
     }
 
-    private IndexedWord pickCandidate(List<NounCandidate> nounCandidates, SemanticGraphEdge word){
+	private boolean addCandidate(List<Modifier> modifiers, SemanticGraphEdge word, String altered_word, List<NounCandidate> nounCandidates) {
+		if (!nounCandidates.isEmpty()){
+			IndexedWord candidate = this.pickCandidate(nounCandidates, word);
+			if (candidate != null){
+				if (altered_word != null){
+					modifiers.add(new Modifier(candidate, altered_word));
+				}
+				modifiers.add(new Modifier(candidate, word.getTarget().word()));
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private IndexedWord pickCandidate(List<NounCandidate> nounCandidates, SemanticGraphEdge word){
         if (nounCandidates.size() == 1){
             return nounCandidates.get(0).indexedWord;
         }
@@ -221,6 +219,15 @@ public class Analyser {
 		public NounCandidate(IndexedWord word, GrammaticalRelation relationship) {
 			this.indexedWord = word;
 			this.relation = relationship;
+		}
+	}
+
+	private class Modifier {
+		public IndexedWord subject;
+		public String modifier;
+		public Modifier(IndexedWord subject, String modifier) {
+			this.subject = subject;
+			this.modifier = modifier;
 		}
 	}
 }
