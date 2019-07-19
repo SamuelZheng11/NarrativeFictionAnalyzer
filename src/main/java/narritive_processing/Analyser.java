@@ -9,9 +9,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import narritive_model.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Analyser {
     private Model model;
@@ -24,12 +22,12 @@ public class Analyser {
     private static List<String> preferred_noun_tags = Arrays.asList("NNP", "NNPS", "PRP");
     private static List<String> adverb_tags = Arrays.asList("RB", "RBS");
     private static String adjectival_modifier_relation = "amod";
+    private static String adverbial_modifier_relation = "advmod";
     private static String noun_subject_relation = "nsubj";
     private static String relative_clause_relation = "acl:relcl";
 	private static List<String> adjective_relationsihps_to_dismiss = Arrays.asList("dobj", "xcomp", "ccomp", "nmod", "acl", "advmod", "advcl");
 	private static List<String> noun_relationsihps_to_dismiss = Arrays.asList("conj");
-
-
+	private String negation_relation = "neg";
 
 
 	public Analyser(Model model) {
@@ -42,10 +40,8 @@ public class Analyser {
 
         this.processEntities(document, current_scene);
         for (CoreSentence sentence : document.sentences()) {
+			System.out.println(sentence.text());
 			List<Modifier> sentenceModifiers = this.findModifiers(sentence.dependencyParse());
-			for (Modifier pair : sentenceModifiers){
-				System.out.println(pair.modifier + " " + pair.subject.word());
-			}
         }
 
             this.sceneMerge(current_scene);
@@ -87,22 +83,39 @@ public class Analyser {
 
     private List<Modifier>  findModifiers(SemanticGraph dependencies){
         List<Modifier> modifiers = new ArrayList<Modifier>();
+        HashMap<String, List<String>> adjustments = new HashMap<String, List<String>>();
 
         //get all word edges in the dep graph
         List<SemanticGraphEdge> words = dependencies.edgeListSorted();
         for (SemanticGraphEdge word : words){
-        	String altered_word = null;
 
             String relation = word.getRelation().getShortName();
             String tag = word.getTarget().tag();
+
+            // if word is an adverb, attach to word to be adjusted
+			if (adverb_tags.contains(tag)){
+				if (relation.equals(negation_relation) || relation.equals(adverbial_modifier_relation)){
+					if (noun_group_tags.contains(word.getSource().tag()) || word.getSource().tag().equals(adjective_tag) || adverb_tags.contains(word.getSource().tag())){
+						if (!adjustments.containsKey(word.getSource().word())){
+							adjustments.put(word.getSource().word(), new ArrayList<String>());
+						}
+						adjustments.get(word.getSource().word()).add(word.getTarget().word());
+					}
+				}
+				continue;
+			}
 
             //if word is adjective find matching noun group word
             if (tag.equals(adjective_tag) || (relation.equals(relative_clause_relation) && noun_tags.contains(tag))){
 
                 if (relation.equals(adjectival_modifier_relation)){
-                	if (word.getSource().tag().matches("JJ.")){
-						altered_word = word.getTarget().word() + word.getSource().word();
+                	if (word.getSource().tag().matches("JJ.") || adverb_tags.contains(word.getSource().tag())){
+						if (!adjustments.containsKey(word.getSource().word())){
+							adjustments.put(word.getSource().word(), new ArrayList<String>());
+						}
+						adjustments.get(word.getSource().word()).add(word.getTarget().word());
 					}
+					continue;
                 }
 
                 List<NounCandidate> nounCandidates = new ArrayList<NounCandidate>();
@@ -114,7 +127,7 @@ public class Analyser {
                         nounCandidates.add(new NounCandidate(edge.getTarget(), edge.getRelation()));
                     }
                 }
-				if (addCandidate(modifiers, word, altered_word, nounCandidates))
+				if (addCandidate(modifiers, word, nounCandidates))
 					continue;
 
 				//if no noun candidate check parents
@@ -124,7 +137,7 @@ public class Analyser {
                         nounCandidates.add(new NounCandidate(incomingEdge.getSource(), incomingEdge.getRelation()));
                     }
                 }
-				if (addCandidate(modifiers, word, altered_word, nounCandidates))
+				if (addCandidate(modifiers, word, nounCandidates))
 					continue;
 
 				//finally check siblings
@@ -136,24 +149,25 @@ public class Analyser {
                         }
                     }
                 }
-				if (addCandidate(modifiers, word, altered_word, nounCandidates))
+				if (addCandidate(modifiers, word, nounCandidates))
 					continue;
-			}else if (adverb_tags.contains(relation)){
-                // TODO: adverb stuff
-            }
+			}
         }
-
-
+        for (Modifier mod : modifiers){
+        	if (adjustments.containsKey(mod.modifier)){
+        		Collections.reverse(adjustments.get((mod.modifier)));
+        		for (String change : adjustments.get(mod.modifier)){
+        			mod.modifier = change + " " + mod.modifier;
+				}
+			}
+		}
         return modifiers;
     }
 
-	private boolean addCandidate(List<Modifier> modifiers, SemanticGraphEdge word, String altered_word, List<NounCandidate> nounCandidates) {
+	private boolean addCandidate(List<Modifier> modifiers, SemanticGraphEdge word, List<NounCandidate> nounCandidates) {
 		if (!nounCandidates.isEmpty()){
 			IndexedWord candidate = this.pickCandidate(nounCandidates, word);
 			if (candidate != null){
-				if (altered_word != null){
-					modifiers.add(new Modifier(candidate, altered_word));
-				}
 				modifiers.add(new Modifier(candidate, word.getTarget().word()));
 			}
 			return true;
@@ -193,12 +207,6 @@ public class Analyser {
 			if(candidate.relation.toString().startsWith(noun_subject_relation)){
 				if (!bestCandidate.relation.toString().startsWith(noun_subject_relation)){
 					bestCandidate = candidate;
-					continue;
-				}
-				else{
-					//TODO: What if there are two subjects?
-					System.out.println(bestCandidate);
-					System.out.println(candidate);
 					continue;
 				}
 			}
