@@ -24,4 +24,20 @@ public class Location {
     public void addModifier(String modifier) {
         this.modifiers.add(modifier);
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public Set<Relationship> getRelationshipSet() {
+        return relationshipSet;
+    }
+
+    public Set<Scene> getSceneAppearances() {
+        return sceneAppearances;
+    }
+
+    public Set<String> getModifiers() {
+        return modifiers;
+    }
 }
