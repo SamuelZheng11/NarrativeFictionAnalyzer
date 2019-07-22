@@ -9,6 +9,7 @@ public class Entity {
     private Set<Relationship> relationshipSet = new HashSet<Relationship>();
     private Set<Scene> sceneAppearances = new HashSet<Scene>();
     private Set<String> modifiers = new HashSet<String>();
+    private Long linesOfDialogue = new Long(0);
 
     public Entity(String name) {
         this.name = name;
@@ -32,5 +33,9 @@ public class Entity {
 
     public void addModifier(String modifier) {
         this.modifiers.add(modifier);
+    }
+
+    public void increaseLinesOfDialogue() {
+        this.linesOfDialogue = ++this.linesOfDialogue;
     }
 }

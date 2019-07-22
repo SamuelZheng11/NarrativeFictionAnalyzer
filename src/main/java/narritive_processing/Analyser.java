@@ -3,6 +3,7 @@ package narritive_processing;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.CoreEntityMention;
+import edu.stanford.nlp.pipeline.CoreQuote;
 import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -46,6 +47,8 @@ public class Analyser {
 
             this.sceneMerge(current_scene);
         this.segmentsAnalysed++;
+
+        this.assignLinesOfDialogueToEntities(document.quotes());
     }
 
     private void processEntities(CoreDocument document, Scene current_scene){
@@ -218,6 +221,16 @@ public class Analyser {
 			}
 		}
         return bestCandidate.indexedWord;
+    }
+
+    private void assignLinesOfDialogueToEntities(List<CoreQuote> sentences) {
+        for (CoreQuote quote: sentences) {
+            if(quote.hasSpeaker) {
+                if(this.model.getEntity(quote.speaker().get()) != null) {
+                    this.model.getEntity(quote.speaker().get()).increaseLinesOfDialogue();
+                }
+            }
+        }
     }
 
     private class NounCandidate{
