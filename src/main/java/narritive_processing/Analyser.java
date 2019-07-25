@@ -1,5 +1,6 @@
 package narritive_processing;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.CoreEntityMention;
@@ -42,7 +43,7 @@ public class Analyser {
         this.processEntities(document, current_scene);
         for (CoreSentence sentence : document.sentences()) {
 			System.out.println(sentence.text());
-			List<Modifier> sentenceModifiers = this.findModifiers(sentence.dependencyParse());
+			List<Modifier> sentenceModifiers = this.findModifiers(sentence);
         }
 
             this.sceneMerge(current_scene);
@@ -84,13 +85,27 @@ public class Analyser {
         this.currentContext.setContext(entity, location, relationship, scene);
     }
 
-    private List<Modifier>  findModifiers(SemanticGraph dependencies){
+    private List<Modifier>  findModifiers(CoreSentence sentence){
+		SemanticGraph dependencies = sentence.dependencyParse();
         List<Modifier> modifiers = new ArrayList<Modifier>();
         HashMap<String, List<String>> adjustments = new HashMap<String, List<String>>();
+
+        HashSet<String> wordsNotInSpeech = new HashSet<String>();
+        boolean inQuotes = false;
+        for (CoreLabel token : sentence.tokens()){
+        	if (token.originalText().equals("\"")){
+        		inQuotes = !inQuotes;
+			}else if(!inQuotes){
+        		wordsNotInSpeech.add(token.originalText());
+			}
+		}
 
         //get all word edges in the dep graph
         List<SemanticGraphEdge> words = dependencies.edgeListSorted();
         for (SemanticGraphEdge word : words){
+			if (!wordsNotInSpeech.contains(word.getTarget().originalText())){
+				continue;
+			}
 
             String relation = word.getRelation().getShortName();
             String tag = word.getTarget().tag();
