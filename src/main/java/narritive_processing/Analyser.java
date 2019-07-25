@@ -30,6 +30,11 @@ public class Analyser {
 	private static List<String> adjective_relationsihps_to_dismiss = Arrays.asList("dobj", "xcomp", "ccomp", "nmod", "acl", "advmod", "advcl");
 	private static List<String> noun_relationsihps_to_dismiss = Arrays.asList("conj");
 	private String negation_relation = "neg";
+	private String verb_tag = "VB";
+	private String copula_relation= "cop";
+	private String passive_auxiliary_relation = "auxpass";
+	private String possessive_tag = "pos";
+	private String possessive_noun_modifier_relation = "nmod:poss";
 
 
 	public Analyser(Model model) {
@@ -43,7 +48,11 @@ public class Analyser {
         this.processEntities(document, current_scene);
         for (CoreSentence sentence : document.sentences()) {
 			System.out.println(sentence.text());
-			List<Modifier> sentenceModifiers = this.findModifiers(sentence);
+			RelationContainer sentenceRelations = this.findModifiersAndRelationships(sentence);
+
+			for (ProspectiveRelationship PR : sentenceRelations.relationships){
+				System.out.println(PR.parentEntity.toString() + " " + PR.description + " " + PR.childEntity.toString());
+			}
         }
 
             this.sceneMerge(current_scene);
@@ -85,9 +94,14 @@ public class Analyser {
         this.currentContext.setContext(entity, location, relationship, scene);
     }
 
-    private List<Modifier>  findModifiers(CoreSentence sentence){
+
+    private RelationContainer findModifiersAndRelationships(CoreSentence sentence){
 		SemanticGraph dependencies = sentence.dependencyParse();
-        List<Modifier> modifiers = new ArrayList<Modifier>();
+
+
+		List<Modifier> modifiers = new ArrayList<Modifier>();
+        List<ProspectiveRelationship> relationships = new ArrayList<ProspectiveRelationship>();
+
         HashMap<String, List<String>> adjustments = new HashMap<String, List<String>>();
 
         HashSet<String> wordsNotInSpeech = new HashSet<String>();
@@ -124,7 +138,7 @@ public class Analyser {
 			}
 
             //if word is adjective find matching noun group word
-            if (tag.equals(adjective_tag) || (relation.equals(relative_clause_relation) && noun_tags.contains(tag))){
+            else if (tag.equals(adjective_tag) || (relation.equals(relative_clause_relation) && noun_tags.contains(tag))){
 
                 if (relation.equals(adjectival_modifier_relation)){
                 	if (word.getSource().tag().matches("JJ.") || adverb_tags.contains(word.getSource().tag())){
@@ -170,6 +184,25 @@ public class Analyser {
 				if (addCandidate(modifiers, word, nounCandidates))
 					continue;
 			}
+			//Here begin looking for relationships
+			//if the word is a verb and does not have the anti-relationships
+			else if(tag.startsWith(verb_tag) && !(relation.equals(copula_relation) || relation.equals(passive_auxiliary_relation))){
+				System.out.print(dependencies);
+			}
+
+			//if the word is a possesive, find the matching relationship
+			else if(relation.equals(possessive_noun_modifier_relation)){
+				ProspectiveRelationship relationship = new ProspectiveRelationship();
+				relationship.description = "Possesses";
+				relationship.parentEntity = new ArrayList<IndexedWord>();
+				relationship.parentEntity.add(word.getTarget());
+				relationship.childEntity = new ArrayList<IndexedWord>();
+				relationship.childEntity.add(word.getSource());
+
+				relationships.add(relationship);
+				continue;
+			}
+
         }
         for (Modifier mod : modifiers){
         	if (adjustments.containsKey(mod.modifier)){
@@ -179,7 +212,7 @@ public class Analyser {
 				}
 			}
 		}
-        return modifiers;
+        return new RelationContainer(modifiers, relationships);
     }
 
 	private boolean addCandidate(List<Modifier> modifiers, SemanticGraphEdge word, List<NounCandidate> nounCandidates) {
@@ -258,6 +291,16 @@ public class Analyser {
 		}
 	}
 
+	private class RelationContainer{
+		public List<Modifier> modifiers;
+		public List<ProspectiveRelationship> relationships;
+
+		public RelationContainer(List<Modifier> modifiers, List<ProspectiveRelationship> relationships){
+			this.modifiers = modifiers;
+			this.relationships = relationships;
+		}
+	}
+
 	private class Modifier {
 		public IndexedWord subject;
 		public String modifier;
@@ -265,5 +308,12 @@ public class Analyser {
 			this.subject = subject;
 			this.modifier = modifier;
 		}
+	}
+
+	private class ProspectiveRelationship{
+		public List<IndexedWord> parentEntity;
+		public List<IndexedWord> childEntity;
+		public List<IndexedWord> usingEntity;
+		public String description;
 	}
 }
