@@ -56,9 +56,6 @@ public class Analyser {
             }
 			List<Modifier> sentenceModifiers = this.findModifiers(sentence);
             for (Modifier mod : sentenceModifiers) {
-                if(mod.modifier.equals("anxious")) {
-                    System.out.println("here");
-                }
                 if(model.getModelObject(mod.subject.originalText()) != null) {
                     this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
                 } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
