@@ -8,6 +8,7 @@ public class Context {
     private static Relationship relationship;
     private static Location location;
     private static Scene scene;
+    private static ModelObject mostRecentModelObjectUpdated;
     private int segmentsAnalysed = 0;
 
     public static Context getContext() {
@@ -30,6 +31,12 @@ public class Context {
         this.location = location;
         this.relationship = relationship;
         this.scene = scene;
+
+        if(entity != null) {
+            this.mostRecentModelObjectUpdated = entity;
+        } else if(location != null) {
+            this.mostRecentModelObjectUpdated = location;
+        }
     }
 
     public Entity getEntity() {
@@ -54,5 +61,9 @@ public class Context {
 
     public void setSegmentsAnalysed(int segmentsAnalysed) {
         this.segmentsAnalysed = segmentsAnalysed;
+    }
+
+    public ModelObject getMostRecentModelObjectUpdated() {
+        return this.mostRecentModelObjectUpdated;
     }
 }

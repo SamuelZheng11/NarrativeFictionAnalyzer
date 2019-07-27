@@ -3,7 +3,7 @@ package narritive_model;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Location {
+public class Location implements ModelObject {
     private String name;
     private Set<Relationship> relationshipSet = new HashSet<Relationship>();
     private Set<Scene> sceneAppearances = new HashSet<Scene>();

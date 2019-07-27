@@ -12,7 +12,6 @@ public class Model {
     private List<Scene> scenes = new ArrayList<Scene>();
     private Map<String, String> aliasMap = new HashMap();
 
-
     public Entity addEntity(CoreEntityMention em) {
         Entity newEntity = new Entity(em.text());
         this.entities.put(newEntity.getName(), newEntity);
@@ -28,7 +27,7 @@ public class Model {
         }
     }
 
-    public Entity getEntity(String name){
+    public ModelObject getModelObject(String name){
         if (this.entities.containsKey(name)){
             return this.entities.get(name);
         }else if(this.aliasMap.containsKey(name)){
