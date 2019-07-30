@@ -35,6 +35,10 @@ public class Analyser {
 	private String passive_auxiliary_relation = "auxpass";
 	private String possessive_tag = "pos";
 	private String possessive_noun_modifier_relation = "nmod:poss";
+	private static String person_identifier = "PERSON";
+	private static String misc_noun_identifier = "MISC";
+	private static List<String> internal_personal_pronoun = Arrays.asList("I", "ME");
+    private static List<String> external_personal_pronoun = Arrays.asList("THEY", "HE", "SHE", "HIM", "HER", "IT", "THEM");
 
 
 	public Analyser(Model model) {
@@ -45,36 +49,54 @@ public class Analyser {
         this.currentContext.setSegmentsAnalysed(this.segmentsAnalysed);
         Scene current_scene = new Scene(new BookLocation(segmentsAnalysed, 0, 0));
 
-        this.processEntities(document, current_scene);
-        for (CoreSentence sentence : document.sentences()) {
-			System.out.println(sentence.text());
-			RelationContainer sentenceRelations = this.findModifiersAndRelationships(sentence);
-
-			for (ProspectiveRelationship PR : sentenceRelations.relationships){
-				System.out.println(PR.parentEntity.toString() + " " + PR.description + " " + PR.childEntity.toString());
-			}
+        for (CoreEntityMention em : document.entityMentions()) {
+            this.processEntities(em, current_scene);
         }
 
-            this.sceneMerge(current_scene);
+        for (CoreSentence sentence : document.sentences()) {
+            for (CoreEntityMention em: sentence.entityMentions()) {
+                if(isEntity(em)) {
+                    this.setContext((Entity) this.model.getModelObject(em.text()), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
+                }
+            }
+			List<Modifier> sentenceModifiers = this.findModifiers(sentence);
+            for (Modifier mod : sentenceModifiers) {
+                if(model.getModelObject(mod.subject.originalText()) != null) {
+                    this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
+                } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
+                    this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
+                }
+            }
+			System.out.println(sentence.text());
+			RelationContainer sentenceRelations = this.findModifiersAndRelationships(sentence);
+        }
+
+        this.sceneMerge(current_scene);
         this.segmentsAnalysed++;
 
         this.assignLinesOfDialogueToEntities(document.quotes());
     }
 
-    private void processEntities(CoreDocument document, Scene current_scene){
-        for (CoreEntityMention em : document.entityMentions()) {
-            if(em.entityType().equals("PERSON") && !em.entityTypeConfidences().containsKey("O")) {
-                // if the model does not contain this character, add it
-                if (!this.currentContext.getEntity().getName().contains(em.text())) {
-                    this.setContext(this.model.addEntity(em), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
-                } else {
-                    model.addAlias(this.currentContext.getEntity().getName(), em.text());
-                }
-                //retrieve entity object from model and add to scene
-                Entity found_entity = model.getEntity(em.text());
-                if (!current_scene.containsEntity(found_entity)){
-                    current_scene.addEntityToScene(found_entity);
-                }
+    private boolean isEntity(CoreEntityMention entityMention) {
+        if ((entityMention.entityType().equals(this.person_identifier) && !entityMention.entityTypeConfidences().containsKey("O")) || entityMention.entityType().equals(this.misc_noun_identifier)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void processEntities(CoreEntityMention em, Scene current_scene){
+        if(this.isEntity(em)) {
+            // if the model does not contain this character, add it
+            if (!this.currentContext.getEntity().getName().contains(em.text())) {
+                this.setContext(this.model.addEntity(em), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
+            } else {
+                model.addAlias(this.currentContext.getEntity().getName(), em.text());
+            }
+            //retrieve entity object from model and add to scene
+            Entity found_entity = (Entity) model.getModelObject(em.text());
+            if (!current_scene.containsEntity(found_entity)){
+                current_scene.addEntityToScene(found_entity);
             }
         }
     }
@@ -274,8 +296,8 @@ public class Analyser {
     private void assignLinesOfDialogueToEntities(List<CoreQuote> sentences) {
         for (CoreQuote quote: sentences) {
             if(quote.hasSpeaker) {
-                if(this.model.getEntity(quote.speaker().get()) != null) {
-                    this.model.getEntity(quote.speaker().get()).increaseLinesOfDialogue();
+                if(this.model.getModelObject(quote.speaker().get()) != null) {
+                    ((Entity) this.model.getModelObject(quote.speaker().get())).increaseLinesOfDialogue();
                 }
             }
         }

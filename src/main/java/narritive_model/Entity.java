@@ -3,7 +3,7 @@ package narritive_model;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Entity {
+public class Entity implements ModelObject {
     private String name;
     private Set<String> aliases = new HashSet<String>();
     private Set<Relationship> relationshipSet = new HashSet<Relationship>();
