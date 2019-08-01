@@ -49,25 +49,30 @@ public class Analyser {
         }
 
         for (CoreSentence sentence : document.sentences()) {
-            for (CoreEntityMention em: sentence.entityMentions()) {
-                if(isEntity(em)) {
-                    this.setContext((Entity) this.model.getModelObject(em.text()), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
-                }
-            }
 			List<Modifier> sentenceModifiers = this.findModifiers(sentence);
-            for (Modifier mod : sentenceModifiers) {
-                if(model.getModelObject(mod.subject.originalText()) != null) {
-                    this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
-                } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
-                    this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
-                }
-            }
+			this.linkEntityToModifier(sentence, sentenceModifiers);
         }
 
         this.sceneMerge(current_scene);
         this.segmentsAnalysed++;
 
         this.assignLinesOfDialogueToEntities(document.quotes());
+    }
+
+    private void linkEntityToModifier(CoreSentence sentence, List<Modifier> sentenceModifiers) {
+        for (CoreEntityMention em: sentence.entityMentions()) {
+            if(isEntity(em)) {
+                this.setContext((Entity) this.model.getModelObject(em.text()), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
+            }
+        }
+
+        for (Modifier mod : sentenceModifiers) {
+            if(model.getModelObject(mod.subject.originalText()) != null) {
+                this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
+            } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
+                this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
+            }
+        }
     }
 
     private boolean isEntity(CoreEntityMention entityMention) {
