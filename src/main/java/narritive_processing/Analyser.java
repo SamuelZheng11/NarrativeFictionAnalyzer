@@ -49,7 +49,8 @@ public class Analyser {
 
     public void processParagraph(CoreDocument document) {
         this.currentContext.setSegmentsAnalysed(this.segmentsAnalysed);
-        Scene current_scene = new Scene(new BookLocation(segmentsAnalysed, 0, 0));
+        int sentenceIndex = 0;
+        Scene current_scene = new Scene(new BookLocation(segmentsAnalysed, sentenceIndex, 0));
 
         for (CoreEntityMention em : document.entityMentions()) {
             this.processEntities(em, current_scene);
@@ -82,6 +83,7 @@ public class Analyser {
                     this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
                 }
             }
+            sentenceIndex++;
         }
 
         this.sceneMerge(current_scene);
