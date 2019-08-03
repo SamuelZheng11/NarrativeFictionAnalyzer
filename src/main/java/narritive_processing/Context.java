@@ -18,7 +18,7 @@ public class Context {
     public static Context getContext() {
         if (context == null) {
             context = new Context();
-            context.setContext(new Entity("Default", "MALE"), null, null, null);
+            context.overrideContext(new Entity("Default", "MALE"));
         }
 
         return context;
@@ -31,21 +31,14 @@ public class Context {
         this.scene = new Scene(new BookLocation(this.segmentsAnalysed, 0, 0));
     }
 
-    public void setContext(Entity entity, Location location, Relationship relationship, Scene scene) {
-        this.entities.put(entity.getGender(), entity);
-        this.location = location;
-        this.relationship = relationship;
-        this.scene = scene;
+    public void overrideContext(Entity entity) {
+        entities.put(entity.getGender(), entity);
+        mostRecentModelObjectUpdated = entity;
 
-        if(entities != null) {
-            this.mostRecentModelObjectUpdated = entity;
-            if(entity.getGender().equals(Analyser.genders.get(2))) {
-                this.mostRecentlyUpdatedIsOther = true;
-            } else {
-                this.mostRecentlyUpdatedIsOther = false;
-            }
-        } else if(location != null) {
-            this.mostRecentModelObjectUpdated = location;
+        if(entity.getGender().equals(Analyser.genders.get(2))) {
+            mostRecentlyUpdatedIsOther = true;
+        } else {
+            mostRecentlyUpdatedIsOther = false;
         }
     }
 
@@ -53,12 +46,18 @@ public class Context {
         return this.entities.get(entityType);
     }
 
+    public Map getEntities() { return this.entities; }
+
     public Relationship getRelationship() {
         return relationship;
     }
 
     public Location getLocation() {
         return location;
+    }
+
+    public void setScene(Scene scene) {
+        this.scene = scene;
     }
 
     public Scene getScene() {

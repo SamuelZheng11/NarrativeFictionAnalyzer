@@ -73,7 +73,7 @@ public class Analyser {
 
         for (CoreEntityMention em: sentence.entityMentions()) {
             if(isEntity(em)) {
-                this.setContext((Entity) this.model.getModelObject(em.text()), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
+                this.currentContext.overrideContext((Entity) this.model.getModelObject(em.text()));
             }
         }
     }
@@ -106,7 +106,7 @@ public class Analyser {
             String entityGender = this.identifyGender(em);
             // if the model does not contain this character, add it
             if ( this.currentContext.getContextEntity(entityGender) == null || !this.currentContext.getContextEntity(entityGender).getName().contains(em.text())) {
-                this.setContext(this.model.addEntity(em, entityGender), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
+                this.currentContext.overrideContext(this.model.addEntity(em, entityGender));
             } else {
                 model.addAlias(this.currentContext.getContextEntity(entityGender).getName(), em.text());
             }
@@ -124,13 +124,9 @@ public class Analyser {
             return;
         }else{
             this.model.addScene(current_scene);
-            this.currentContext.setContext(this.currentContext.getContextEntity("female"), this.currentContext.getLocation(), this.currentContext.getRelationship(), current_scene);
+            this.currentContext.setScene(current_scene);
             return;
         }
-    }
-
-    private void setContext(Entity entity, Location location, Relationship relationship, Scene scene) {
-        this.currentContext.setContext(entity, location, relationship, scene);
     }
 
     private List<Modifier>  findModifiers(CoreSentence sentence){
