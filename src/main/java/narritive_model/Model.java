@@ -12,8 +12,8 @@ public class Model {
     private List<Scene> scenes = new ArrayList<Scene>();
     private Map<String, String> aliasMap = new HashMap();
 
-    public Entity addEntity(CoreEntityMention em) {
-        Entity newEntity = new Entity(em.text());
+    public Entity addEntity(CoreEntityMention em, String gender) {
+        Entity newEntity = new Entity(em.text(), gender);
         this.entities.put(newEntity.getName(), newEntity);
         return newEntity;
     }

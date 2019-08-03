@@ -22,9 +22,8 @@ public class Launcher {
     public static void main(String[] args) {
         // Setup NLP and System Objects
         Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,coref,quote");
+        props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, gender, parse, coref,quote");
         props.setProperty("coref.algorithm", "neural");
-
 
         // Prepare objects and paragraph for processing
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);

@@ -1,14 +1,18 @@
 package narritive_processing;
 
+import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.pipeline.CoreDocument;
-import edu.stanford.nlp.pipeline.CoreEntityMention;
-import edu.stanford.nlp.pipeline.CoreQuote;
-import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.quoteattribution.ChapterAnnotator;
+import edu.stanford.nlp.quoteattribution.Person;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.TypesafeMap;
 import narritive_model.*;
 
 import java.util.*;
@@ -34,6 +38,7 @@ public class Analyser {
 	private static String misc_noun_identifier = "MISC";
 	private static List<String> internal_personal_pronoun = Arrays.asList("I", "ME");
     private static List<String> external_personal_pronoun = Arrays.asList("THEY", "HE", "SHE", "HIM", "HER", "IT", "THEM");
+    private static List<String> genders = Arrays.asList("FEMALE", "MALE", "OTHER");
 
 
 	public Analyser(Model model) {
@@ -43,7 +48,7 @@ public class Analyser {
     public void processParagraph(CoreDocument document) {
         this.currentContext.setSegmentsAnalysed(this.segmentsAnalysed);
         Scene current_scene = new Scene(new BookLocation(segmentsAnalysed, 0, 0));
-
+        
         for (CoreEntityMention em : document.entityMentions()) {
             this.processEntities(em, current_scene);
         }
@@ -83,13 +88,29 @@ public class Analyser {
         return false;
     }
 
+    private String identifyGender(CoreEntityMention entity) {
+        if(entity.coreMap().get(CoreAnnotations.GenderAnnotation.class) == null) {
+            return this.genders.get(2);
+
+        }
+
+        for (String gender: this.genders) {
+            if(entity.coreMap().get(CoreAnnotations.GenderAnnotation.class).equals(gender)) {
+                return gender;
+            }
+        }
+
+        return this.genders.get(2);
+    }
+
     private void processEntities(CoreEntityMention em, Scene current_scene){
         if(this.isEntity(em)) {
+            String entityGender = this.identifyGender(em);
             // if the model does not contain this character, add it
-            if (!this.currentContext.getEntity().getName().contains(em.text())) {
-                this.setContext(this.model.addEntity(em), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
+            if ( this.currentContext.getContextEntity(entityGender) == null || !this.currentContext.getContextEntity(entityGender).getName().contains(em.text())) {
+                this.setContext(this.model.addEntity(em, entityGender), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
             } else {
-                model.addAlias(this.currentContext.getEntity().getName(), em.text());
+                model.addAlias(this.currentContext.getContextEntity(entityGender).getName(), em.text());
             }
             //retrieve entity object from model and add to scene
             Entity found_entity = (Entity) model.getModelObject(em.text());
@@ -105,7 +126,7 @@ public class Analyser {
             return;
         }else{
             this.model.addScene(current_scene);
-            this.currentContext.setContext(this.currentContext.getEntity(), this.currentContext.getLocation(), this.currentContext.getRelationship(), current_scene);
+            this.currentContext.setContext(this.currentContext.getContextEntity("female"), this.currentContext.getLocation(), this.currentContext.getRelationship(), current_scene);
             return;
         }
     }

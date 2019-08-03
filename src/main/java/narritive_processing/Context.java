@@ -2,9 +2,12 @@ package narritive_processing;
 
 import narritive_model.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Context {
     private static Context context;
-    private static Entity entity;
+    private static Map<String, Entity> entities;
     private static Relationship relationship;
     private static Location location;
     private static Scene scene;
@@ -14,33 +17,34 @@ public class Context {
     public static Context getContext() {
         if (context == null) {
             context = new Context();
+            context.setContext(new Entity("Default", "MALE"), null, null, null);
         }
 
         return context;
     }
 
     private Context() {
-        this.entity = new Entity("");
+        this.entities = new HashMap<String, Entity>();
         this.location = new Location("");
         this.relationship = null;
         this.scene = new Scene(new BookLocation(this.segmentsAnalysed, 0, 0));
     }
 
     public void setContext(Entity entity, Location location, Relationship relationship, Scene scene) {
-        this.entity = entity;
+        this.entities.put(entity.getGender(), entity);
         this.location = location;
         this.relationship = relationship;
         this.scene = scene;
 
-        if(entity != null) {
+        if(entities != null) {
             this.mostRecentModelObjectUpdated = entity;
         } else if(location != null) {
             this.mostRecentModelObjectUpdated = location;
         }
     }
 
-    public Entity getEntity() {
-        return entity;
+    public Entity getContextEntity(String entityType) {
+        return this.entities.get(entityType);
     }
 
     public Relationship getRelationship() {
