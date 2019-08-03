@@ -12,6 +12,7 @@ public class Context {
     private static Location location;
     private static Scene scene;
     private static ModelObject mostRecentModelObjectUpdated;
+    private static boolean mostRecentlyUpdatedIsOther;
     private int segmentsAnalysed = 0;
 
     public static Context getContext() {
@@ -38,6 +39,11 @@ public class Context {
 
         if(entities != null) {
             this.mostRecentModelObjectUpdated = entity;
+            if(entity.getGender().equals(Analyser.genders.get(2))) {
+                this.mostRecentlyUpdatedIsOther = true;
+            } else {
+                this.mostRecentlyUpdatedIsOther = false;
+            }
         } else if(location != null) {
             this.mostRecentModelObjectUpdated = location;
         }
@@ -70,4 +76,6 @@ public class Context {
     public ModelObject getMostRecentModelObjectUpdated() {
         return this.mostRecentModelObjectUpdated;
     }
+
+    public boolean isMostRecentlyUpdatedIsOther() { return this.mostRecentlyUpdatedIsOther; }
 }

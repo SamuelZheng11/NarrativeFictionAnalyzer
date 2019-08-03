@@ -1,18 +1,12 @@
 package narritive_processing;
 
-import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.*;
-import edu.stanford.nlp.quoteattribution.ChapterAnnotator;
-import edu.stanford.nlp.quoteattribution.Person;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.TypesafeMap;
 import narritive_model.*;
 
 import java.util.*;
@@ -38,7 +32,7 @@ public class Analyser {
 	private static String misc_noun_identifier = "MISC";
 	private static List<String> internal_personal_pronoun = Arrays.asList("I", "ME");
     private static List<String> external_personal_pronoun = Arrays.asList("THEY", "HE", "SHE", "HIM", "HER", "IT", "THEM");
-    private static List<String> genders = Arrays.asList("FEMALE", "MALE", "OTHER");
+    public static List<String> genders = Arrays.asList("FEMALE", "MALE", "OTHER");
 
 
 	public Analyser(Model model) {
@@ -65,17 +59,21 @@ public class Analyser {
     }
 
     private void linkEntityToModifier(CoreSentence sentence, List<Modifier> sentenceModifiers) {
-        for (CoreEntityMention em: sentence.entityMentions()) {
-            if(isEntity(em)) {
-                this.setContext((Entity) this.model.getModelObject(em.text()), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
-            }
-        }
-
         for (Modifier mod : sentenceModifiers) {
             if(model.getModelObject(mod.subject.originalText()) != null) {
                 this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
             } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
                 this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
+            } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && external_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
+                if(this.currentContext.isMostRecentlyUpdatedIsOther()) {
+                    this.model.getModelObject(this.currentContext.getContextEntity(genders.get(2)).getName()).addModifier(mod.modifier);
+                }
+            }
+        }
+
+        for (CoreEntityMention em: sentence.entityMentions()) {
+            if(isEntity(em)) {
+                this.setContext((Entity) this.model.getModelObject(em.text()), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
             }
         }
     }
