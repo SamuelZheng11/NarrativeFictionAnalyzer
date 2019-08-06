@@ -23,7 +23,7 @@ public class Context {
         this.entity = new Entity("");
         this.location = new Location("");
         this.relationship = null;
-        this.scene = new Scene(new BookLocation(this.segmentsAnalysed, 0, 0));
+        this.scene = new Scene(new BookLocation(this.segmentsAnalysed, 0));
     }
 
     public void setContext(Entity entity, Location location, Relationship relationship, Scene scene) {

@@ -84,8 +84,8 @@ public class Analyser {
 
             sentenceIndex++;
         }
-
-        this.sceneMerge(current_scene);
+        sentenceIndex--;
+		this.sceneMerge(current_scene, new BookLocation(this.currentContext.getSegmentsAnalysed(), sentenceIndex));
         this.segmentsAnalysed++;
 
         this.assignLinesOfDialogueToEntities(document.quotes());
@@ -115,14 +115,15 @@ public class Analyser {
         }
     }
 
-    private void sceneMerge(Scene current_scene){
+    private void sceneMerge(Scene current_scene, BookLocation location){
         Scene contextScene = this.currentContext.getScene();
         if (current_scene.equals(contextScene)){
             return;
         }else{
-            this.model.addScene(current_scene);
-            this.currentContext.setContext(this.currentContext.getEntity(), this.currentContext.getLocation(), this.currentContext.getRelationship(), current_scene);
-            return;
+        	current_scene.setSceneEnd(location);
+        	this.model.addScene(current_scene);
+        	this.currentContext.setContext(this.currentContext.getEntity(), this.currentContext.getLocation(), this.currentContext.getRelationship(), current_scene);
+        	return;
         }
     }
 
