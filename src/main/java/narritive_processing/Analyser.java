@@ -22,6 +22,7 @@ public class Analyser {
     private static List<String> noun_group_tags = Arrays.asList("NN", "NNS", "NNP", "NNPS", "PRP");
     private static List<String> noun_tags = Arrays.asList("NN", "NNS", "NNP", "NNPS");
     private static List<String> preferred_noun_tags = Arrays.asList("NNP", "NNPS", "PRP");
+    private static List<String> proper_noun_tags = Arrays.asList("NNP", "NNPS");
     private static List<String> adverb_tags = Arrays.asList("RB", "RBS");
     private static String adjectival_modifier_relation = "amod";
     private static String adverbial_modifier_relation = "advmod";
@@ -50,31 +51,21 @@ public class Analyser {
     public void processParagraph(CoreDocument document) {
         this.currentContext.setSegmentsAnalysed(this.segmentsAnalysed);
         int sentenceIndex = 0;
-        Scene current_scene = new Scene(new BookLocation(segmentsAnalysed, sentenceIndex, 0));
+        Scene current_scene = new Scene(new BookLocation(segmentsAnalysed, sentenceIndex));
 
         for (CoreEntityMention em : document.entityMentions()) {
             this.processEntities(em, current_scene);
         }
 
         for (CoreSentence sentence : document.sentences()) {
+        	BookLocation bookLocation = new BookLocation(currentContext.getSegmentsAnalysed(), sentenceIndex);
             for (CoreEntityMention em: sentence.entityMentions()) {
                 if(isEntity(em)) {
                     this.setContext((Entity) this.model.getModelObject(em.text()), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
                 }
             }
 
-            System.out.println();
-            System.out.println(sentence.text());
 			RelationContainer sentenceRelations = this.findModifiersAndRelationships(sentence);
-			if (sentenceRelations.relationships != null){
-				for (ProspectiveRelationship rel : sentenceRelations.relationships) {
-					if (rel.usingEntity != null){
-						System.out.println(rel.parentEntity.word() + ": " + rel.description + ", "+ rel.usingEntity.word() + " : " + rel.childEntity.word());
-					}else{
-						System.out.println(rel.parentEntity.word() + ": " + rel.description + " : " + rel.childEntity.word());
-					}
-				}
-			}
 
             for (Modifier mod : sentenceRelations.modifiers) {
                 if(model.getModelObject(mod.subject.originalText()) != null) {
@@ -83,6 +74,14 @@ public class Analyser {
                     this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
                 }
             }
+
+            for (ProspectiveRelationship rel : sentenceRelations.relationships){
+            	Relationship relationship = processRelationship(sentence, rel, bookLocation);
+            	if (relationship!=null){
+            		this.model.addRelationship(relationship);
+				}
+			}
+
             sentenceIndex++;
         }
 
@@ -224,7 +223,7 @@ public class Analyser {
 			else if(tag.startsWith(verb_tag) && !(relation.equals(copula_relation) || relation.equals(passive_auxiliary_relation))){
 				List<SemanticGraphEdge> wordChildren = dependencies.getOutEdgesSorted(word.getTarget());
 				ProspectiveRelationship relationship = new ProspectiveRelationship();
-
+				relationship.isPossessive = false;
 				IndexedWord directObject = null;
 				IndexedWord indirectObject = null;
 				IndexedWord subject = null;
@@ -238,13 +237,13 @@ public class Analyser {
 					}
 				}
 				if ((directObject != null || indirectObject != null) && subject != null){
-					relationship.parentEntity = subject;
+					relationship.parentObject = subject;
 
 					if (directObject == null){
-						relationship.childEntity = indirectObject;
+						relationship.childObject = indirectObject;
 					}else{
-						relationship.childEntity = directObject;
-						relationship.usingEntity = indirectObject;
+						relationship.childObject = directObject;
+						relationship.usingObject = indirectObject;
 					}
 
 					String description = "";
@@ -264,9 +263,9 @@ public class Analyser {
 			//if the word is a possessive, find the matching relationship
 			else if(relation.equals(possessive_noun_modifier_relation)){
 				ProspectiveRelationship relationship = new ProspectiveRelationship();
-				relationship.childEntity = word.getTarget();
-				relationship.parentEntity = word.getSource();
-
+				relationship.parentObject = word.getTarget();
+				relationship.childObject = word.getSource();
+				relationship.isPossessive = true;
 				String description = "";
 				if (adjustments.containsKey(word.getSource())){
 					List<String> changes = adjustments.get(word.getSource().word());
@@ -274,7 +273,6 @@ public class Analyser {
 						description += change + " ";
 					}
 				}
-				description += "owned by";
 				relationship.description = description;
 
 				relationships.add(relationship);
@@ -292,6 +290,27 @@ public class Analyser {
 		}
         return new RelationContainer(modifiers, relationships);
     }
+
+    private Relationship processRelationship(CoreSentence sentence, ProspectiveRelationship prospectiveRelationship, BookLocation location){
+		ModelObject subject = findModelObjectFromReference(sentence, prospectiveRelationship.parentObject);
+		ModelObject  object = findModelObjectFromReference(sentence, prospectiveRelationship.childObject);
+		ModelObject  usingEntity = null;
+		if (prospectiveRelationship.usingObject != null){
+			usingEntity = findModelObjectFromReference(sentence, prospectiveRelationship.usingObject);
+			if (usingEntity == null){
+				prospectiveRelationship.description += prospectiveRelationship.usingObject.word();
+			}
+		}
+		if (subject == null || object == null){
+			return null;
+		}
+		if(prospectiveRelationship.isPossessive && !proper_noun_tags.contains(prospectiveRelationship.childObject.tag())){
+			String amendedDescription = "has " + prospectiveRelationship.description + prospectiveRelationship.childObject.word();
+			return new Relationship(subject, object, usingEntity, amendedDescription, location);
+		}else{
+			return new Relationship(subject, object, usingEntity, prospectiveRelationship.description, location);
+		}
+	}
 
 	private boolean addCandidate(List<Modifier> modifiers, SemanticGraphEdge word, List<NounCandidate> nounCandidates) {
 		if (!nounCandidates.isEmpty()){
@@ -359,6 +378,11 @@ public class Analyser {
         }
     }
 
+    private ModelObject findModelObjectFromReference(CoreSentence sentence, IndexedWord possibleReference){
+		//TODO find entity for words referencing them. If it doesn't exist/matter, return null
+		return null;
+	}
+
     private class NounCandidate{
     	public GrammaticalRelation relation;
     	public IndexedWord indexedWord;
@@ -389,9 +413,10 @@ public class Analyser {
 	}
 
 	private class ProspectiveRelationship{
-		public IndexedWord parentEntity;
-		public IndexedWord childEntity;
-		public IndexedWord usingEntity;
+		public IndexedWord parentObject;
+		public IndexedWord childObject;
+		public IndexedWord usingObject;
 		public String description;
+		public boolean isPossessive;
 	}
 }
