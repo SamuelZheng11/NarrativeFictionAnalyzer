@@ -25,7 +25,11 @@ public class Scene {
      return sceneEntities.containsKey(entity.getName());
     }
 
-    public boolean equals (Scene scene){
+	public void setSceneEnd(BookLocation sceneEnd) {
+		this.sceneEnd = sceneEnd;
+	}
+
+	public boolean equals (Scene scene){
         if(this.sceneBeginning != scene.sceneBeginning || !this.sceneBeginning.equals(scene.sceneBeginning)){
             return false;
         }else if (this.sceneEnd != scene.sceneEnd || !this.sceneEnd.equals(scene.sceneEnd)){
