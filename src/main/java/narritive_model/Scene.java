@@ -41,4 +41,13 @@ public class Scene {
         }
         return true;
     }
+
+    public boolean matches (Scene scene){
+        if (!this.sceneLocations.keySet().equals(scene.sceneLocations.keySet())){
+            return false;
+        }else if (!this.sceneEntities.keySet().equals(scene.sceneEntities.keySet())){
+            return false;
+        }
+        return true;
+    }
 }

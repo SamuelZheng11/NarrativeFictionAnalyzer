@@ -117,7 +117,7 @@ public class Analyser {
 
     private void sceneMerge(Scene current_scene, BookLocation location){
         Scene contextScene = this.currentContext.getScene();
-        if (current_scene.equals(contextScene)){
+        if (current_scene.matches(contextScene)){
             return;
         }else{
         	current_scene.setSceneEnd(location);
@@ -384,7 +384,11 @@ public class Analyser {
 		return null;
 	}
 
-    private class NounCandidate{
+	public Model getModel() {
+		return model;
+	}
+
+	private class NounCandidate{
     	public GrammaticalRelation relation;
     	public IndexedWord indexedWord;
 
