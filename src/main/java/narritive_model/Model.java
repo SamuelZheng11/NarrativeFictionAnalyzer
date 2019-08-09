@@ -81,4 +81,44 @@ public class Model {
         using.addRelationship(relationship);
         this.relationships.add(relationship);
     }
+
+    public Entity getEntity(String name){
+    	if (entities.containsKey(name)){
+    		return entities.get(name);
+		}else if(aliasMap.containsKey(name)){
+    		return entities.get(aliasMap.get(name));
+		}else{
+    		return null;
+		}
+	}
+
+	public Location getLocation(String name){
+    	if (locations.containsKey(name)){
+    		return locations.get(name);
+		}else if(aliasMap.containsKey(name)){
+    		return locations.get(aliasMap.get(name));
+		}else{
+    		return null;
+		}
+	}
+
+    public Map<String, Entity> getEntities() {
+        return entities;
+    }
+
+    public Map<String, Location> getLocations() {
+        return locations;
+    }
+
+    public List<Relationship> getRelationships() {
+        return relationships;
+    }
+
+    public List<Scene> getScenes() {
+        return scenes;
+    }
+
+    public Map<String, String> getAliasMap() {
+        return aliasMap;
+    }
 }
