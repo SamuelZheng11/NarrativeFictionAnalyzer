@@ -29,6 +29,10 @@ public class Entity implements ModelObject {
         this.relationshipSet.add(relationship);
     }
 
+    public Set<Relationship> getRelationshipSet() {
+        return relationshipSet;
+    }
+
     public void addSceneApperance(Scene scene) {
         this.sceneAppearances.add(scene);
     }

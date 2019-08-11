@@ -28,7 +28,7 @@ public class Context {
         this.entities = new HashMap<String, Entity>();
         this.location = new Location("");
         this.relationship = null;
-        this.scene = new Scene(new BookLocation(this.segmentsAnalysed, 0, 0));
+        this.scene = new Scene(new BookLocation(this.segmentsAnalysed, 0));
     }
 
     public void overrideContext(Entity entity) {
