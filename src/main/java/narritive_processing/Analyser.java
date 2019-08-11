@@ -84,9 +84,10 @@ public class Analyser {
 				}
 			}
 
-			for (CoreEntityMention em: sentence.entityMentions()) {
-				if(isEntity(em)) {
-					this.currentContext.overrideContext((Entity) this.model.getModelObject(em.text()));
+			for (CoreLabel cl: sentence.tokens()) {
+				Entity entity = (Entity) this.model.getModelObject(cl.originalText());
+				if(entity != null) {
+					this.currentContext.overrideContext(entity);
 				}
 			}
 
@@ -452,8 +453,6 @@ public class Analyser {
 		} else if (possibleReference.index() == 0 && gender.equals(this.genders.get(2))) {
 			return this.currentContext.getMostRecentModelObjectUpdated();
 		}
-
-		ModelObject item = this.currentContext.getMostRecentModelObjectUpdated();
 
 		for (int i = 0; i < possibleReference.index(); i++) {
 			CoreLabel word = sentence.tokens().get(i);
