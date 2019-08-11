@@ -13,7 +13,11 @@ public class Model {
     private Map<String, String> aliasMap = new HashMap();
 
     public Entity addEntity(CoreEntityMention em, String gender) {
-        Entity newEntity = new Entity(em.text(), gender);
+        return this.addEntity(em.text(), gender);
+    }
+
+    public Entity addEntity(String emName, String gender) {
+        Entity newEntity = new Entity(emName, gender);
         this.entities.put(newEntity.getName(), newEntity);
         return newEntity;
     }

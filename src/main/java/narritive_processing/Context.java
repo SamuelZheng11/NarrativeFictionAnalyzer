@@ -12,6 +12,8 @@ public class Context {
     private static Location location;
     private static Scene scene;
     private static ModelObject mostRecentModelObjectUpdated;
+    private static ModelObject mostRecentFemale;
+    private static ModelObject mostRecentMale;
     private static boolean mostRecentlyUpdatedIsOther;
     private int segmentsAnalysed = 0;
 
@@ -34,6 +36,12 @@ public class Context {
     public void overrideContext(Entity entity) {
         entities.put(entity.getGender(), entity);
         mostRecentModelObjectUpdated = entity;
+
+        if(entity.getGender().equals(Analyser.genders.get(0))) {
+            mostRecentFemale = entity;
+        } else if (entity.getGender().equals(Analyser.genders.get(1))) {
+            mostRecentMale = entity;
+        }
 
         if(entity.getGender().equals(Analyser.genders.get(2))) {
             mostRecentlyUpdatedIsOther = true;
@@ -77,4 +85,8 @@ public class Context {
     }
 
     public boolean isMostRecentlyUpdatedIsOther() { return this.mostRecentlyUpdatedIsOther; }
+
+    public ModelObject getMostRecentFemale() { return this.mostRecentFemale; }
+
+    public ModelObject getMostRecentMale() { return this.mostRecentMale; }
 }
