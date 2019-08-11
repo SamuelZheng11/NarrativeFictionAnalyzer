@@ -4,9 +4,16 @@ import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import narritive_model.Model;
 import narritive_processing.Analyser;
+import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.domain.MediaType;
+import nl.siegmann.epublib.domain.Resource;
+import nl.siegmann.epublib.domain.Spine;
+import nl.siegmann.epublib.epub.EpubReader;
+import nl.siegmann.epublib.service.MediatypeService;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,15 +31,72 @@ public class Launcher {
     
     public static void main(String[] args) {
 
-		LocalDateTime time = LocalDateTime.now();
+        LocalDateTime time = LocalDateTime.now();
 
+        //Document text to be parsed in can be sourced from a local variable, makeDocumentFromTextfile, or makeDocumentFromEpub
 		Model model = analyseDocument(documentText);
 
 		LocalDateTime finish = LocalDateTime.now();
 		finish = finish.minusSeconds(time.getSecondOfMinute());
 		finish = finish.minusHours(time.getHourOfDay());
 		finish = finish.minusMinutes(time.getMinuteOfHour());
-		System.out.println(finish.getMinuteOfHour() + "minutes: "+ finish.getSecondOfMinute() + "seconds");
+		System.out.println(finish.getHourOfDay() + "hours: " + finish.getMinuteOfHour() + "minutes: "+ finish.getSecondOfMinute() + "seconds");
+	}
+
+	private static String makeDocumentFromEpub(String fileName) throws IOException {
+		EpubReader epubReader = new EpubReader();
+		Book book = epubReader.readEpub(new FileInputStream(fileName));
+		Spine spine = book.getSpine();
+		String document = "";
+		for (int i = 0; i < spine.size(); i++) {
+			Resource resource = spine.getResource(i);
+			if (resource.getMediaType().equals(MediatypeService.getMediaTypeByName("application/xhtml+xml"))){
+				String data = new String(resource.getData());
+				data = interpretHTMLLine(data);
+				if (data != null){
+					document = document.concat(data	);
+				}
+			}
+		}
+	return document;
+	}
+
+	// construct document from text file, stripping html if it exists.
+	private static String makeDocumentFromTextFile(String fileName) throws FileNotFoundException {
+        String document = "";
+        BufferedReader file = new BufferedReader(new FileReader(fileName));
+
+        String line = "";
+        try {
+            line = file.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        while (line != null){
+            line = interpretHTMLLine(line);
+            if (line != null){
+            	document = document.concat(line);
+			}
+            try {
+                line = file.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return document;
+    }
+
+    private static String interpretHTMLLine(String line){
+		if (line.contains("<p>")){
+			line = line.replaceAll("(?s)^.*?<p>", "");
+			line = line.replace("</p>", "\n");
+			line = line.replaceAll("<[^>]*>", "");
+			line = line.replaceAll("(\\n)+", "\n");
+			return line;
+		}else{
+			return null;
+		}
 	}
 
 	private static Model analyseDocument(String docText){
