@@ -17,6 +17,7 @@ public class Analyser {
     private Model model;
     private Context currentContext = Context.getContext();
     private int segmentsAnalysed = 0;
+    private boolean inQuotes = false;
 
     private static String adjective_tag = "JJ";
     private static List<String> noun_group_tags = Arrays.asList("NN", "NNS", "NNP", "NNPS", "PRP");
@@ -140,7 +141,6 @@ public class Analyser {
         HashMap<String, List<String>> adjustments = new HashMap<String, List<String>>();
 
         HashSet<String> wordsNotInSpeech = new HashSet<String>();
-        boolean inQuotes = false;
         for (CoreLabel token : sentence.tokens()){
         	if (token.originalText().equals("\"")){
         		inQuotes = !inQuotes;
