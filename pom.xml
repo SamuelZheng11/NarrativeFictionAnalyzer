@@ -39,11 +39,6 @@
             <version>3.9.2</version>
             <classifier>models</classifier>
         </dependency>
-<<<<<<< Updated upstream
-
-        <!-- https://mvnrepository.com/artifact/nl.siegmann.epublib/epublib-core -->
-=======
->>>>>>> Stashed changes
         <dependency>
             <groupId>nl.siegmann.epublib</groupId>
             <artifactId>epublib-core</artifactId>
