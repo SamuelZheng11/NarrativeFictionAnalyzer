@@ -32,6 +32,13 @@
             <version>3.9.2</version>
             <classifier>models</classifier>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/nl.siegmann.epublib/epublib-core -->
+        <dependency>
+            <groupId>nl.siegmann.epublib</groupId>
+            <artifactId>epublib-core</artifactId>
+            <version>3.1</version>
+        </dependency>
     </dependencies>
 
 </project>
