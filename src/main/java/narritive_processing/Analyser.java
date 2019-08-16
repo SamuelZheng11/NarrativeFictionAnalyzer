@@ -83,15 +83,16 @@ public class Analyser {
             	if (relationship!=null){
             		this.model.addRelationship(relationship);
 				}
-			}
 
-			for (CoreLabel cl: sentence.tokens()) {
-				Entity entity = (Entity) this.model.getModelObject(cl.originalText());
-				if(entity != null) {
-					this.currentContext.overrideContext(entity);
+				this.currentContext.clearContextEntities();
+
+				for (CoreLabel cl: sentence.tokens()) {
+					Entity entity = (Entity) this.model.getModelObject(cl.originalText());
+					if(entity != null) {
+						this.currentContext.addContextEntities(entity);
+					}
 				}
 			}
-
             sentenceIndex++;
         }
         sentenceIndex--;
@@ -434,7 +435,7 @@ public class Analyser {
 			return this.currentContext.getMostRecentModelObjectUpdated();
 		}
 
-		for (int i = 0; i < possibleReference.index(); i++) {
+		for (int i = possibleReference.index(); i >= 0; i--) {
 			CoreLabel word = sentence.tokens().get(i);
 			Entity entity = (Entity) this.model.getModelObject(word.originalText());
 			if(entity != null && entity.getGender().equals(gender)) {
@@ -450,13 +451,18 @@ public class Analyser {
 			}
 		}
 
-		if(gender.equals(this.genders.get(0))) {
-			return this.currentContext.getMostRecentFemale();
-		} else if (gender.equals(this.genders.get(1))) {
-			return this.currentContext.getMostRecentMale();
+		List<ModelObject> contextEntities = this.currentContext.getContextEntities();
+
+		for (int i = contextEntities.size() - 1; i >= 0; i--) {
+			Entity entity = (Entity) contextEntities.get(i);
+			if(entity.getGender() == gender) {
+				return entity;
+			} else if (entity.getGender().equals(this.genders.get(2))) {
+				return entity;
+			}
 		}
 
-		return this.currentContext.getMostRecentModelObjectUpdated();
+		return null;
 	}
 
 	public Model getModel() {

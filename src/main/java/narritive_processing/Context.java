@@ -2,6 +2,7 @@ package narritive_processing;
 
 import narritive_model.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,13 +15,12 @@ public class Context {
     private static ModelObject mostRecentModelObjectUpdated;
     private static ModelObject mostRecentFemale;
     private static ModelObject mostRecentMale;
-    private static boolean mostRecentlyUpdatedIsOther;
+    private static ArrayList<ModelObject> contextEntities = new ArrayList<>();
     private int segmentsAnalysed = 0;
 
     public static Context getContext() {
         if (context == null) {
             context = new Context();
-            context.overrideContext(new Entity("Default", "MALE"));
         }
 
         return context;
@@ -36,19 +36,21 @@ public class Context {
     public void overrideContext(Entity entity) {
         entities.put(entity.getGender(), entity);
         mostRecentModelObjectUpdated = entity;
+    }
+
+    public void addContextEntities(Entity entity) {
+        this.contextEntities.add(entity);
 
         if(entity.getGender().equals(Analyser.genders.get(0))) {
             mostRecentFemale = entity;
         } else if (entity.getGender().equals(Analyser.genders.get(1))) {
             mostRecentMale = entity;
         }
-
-        if(entity.getGender().equals(Analyser.genders.get(2))) {
-            mostRecentlyUpdatedIsOther = true;
-        } else {
-            mostRecentlyUpdatedIsOther = false;
-        }
     }
+
+    public void clearContextEntities() { this.contextEntities.clear(); }
+
+    public ArrayList<ModelObject> getContextEntities() { return this.contextEntities; }
 
     public Entity getContextEntity(String entityType) {
         return this.entities.get(entityType);
@@ -83,8 +85,6 @@ public class Context {
     public ModelObject getMostRecentModelObjectUpdated() {
         return this.mostRecentModelObjectUpdated;
     }
-
-    public boolean isMostRecentlyUpdatedIsOther() { return this.mostRecentlyUpdatedIsOther; }
 
     public ModelObject getMostRecentFemale() { return this.mostRecentFemale; }
 
