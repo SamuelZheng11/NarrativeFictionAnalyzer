@@ -100,26 +100,6 @@ public class Analyser {
         this.assignLinesOfDialogueToEntities(document.quotes());
     }
 
-//    private void linkEntityToModifier(CoreSentence sentence, IndexedWord subject) {
-//        for (Modifier mod : sentenceModifiers) {
-//            if(model.getModelObject(mod.subject.originalText()) != null) {
-//                this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
-//            } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
-//                this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
-//            } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && external_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
-//                if(this.currentContext.isMostRecentlyUpdatedIsOther()) {
-//                    this.model.getModelObject(this.currentContext.getContextEntity(genders.get(2)).getName()).addModifier(mod.modifier);
-//                }
-//            }
-//        }
-//
-//        for (CoreEntityMention em: sentence.entityMentions()) {
-//            if(isEntity(em)) {
-//                this.currentContext.overrideContext((Entity) this.model.getModelObject(em.text()));
-//            }
-//        }
-//    }
-
     private boolean isEntity(CoreEntityMention entityMention) {
         if ((entityMention.entityType().equals(this.person_identifier) && !entityMention.entityTypeConfidences().containsKey("O")) || entityMention.entityType().equals(this.misc_noun_identifier) || this.proper_noun_tags.contains(entityMention.entityType())) {
             return true;
