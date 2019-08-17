@@ -17,6 +17,7 @@ public class Model {
     }
 
     public Entity addEntity(String emName, String gender) {
+
         Entity newEntity = new Entity(emName, gender);
         this.entities.put(newEntity.getName(), newEntity);
         return newEntity;

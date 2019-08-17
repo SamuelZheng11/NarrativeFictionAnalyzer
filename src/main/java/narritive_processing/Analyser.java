@@ -40,11 +40,11 @@ public class Analyser {
 	private static String person_identifier = "PERSON";
 	private static String location_identifier = "STATE_OR_PROVINCE";
 	private static String misc_noun_identifier = "MISC";
-	private static List<String> internal_personal_pronoun = Arrays.asList("I", "ME");
+	private static List<String> internal_personal_pronoun = Arrays.asList("I", "ME", "MY", "OUR", "US", "WE");
  	private static List<String> external_female_pronoun = Arrays.asList("SHE", "HER");
-	private static List<String> external_male_pronoun = Arrays.asList("HE", "HIM");
+	private static List<String> external_male_pronoun = Arrays.asList("HE", "HIM", "HIS");
 	private static List<String> external_other_pronoun = Arrays.asList("THEY", "IT", "THEM");
-	public static List<String> genders = Arrays.asList("FEMALE", "MALE", "OTHER");
+	public static List<String> genders = Arrays.asList("FEMALE", "MALE", "OTHER", "LOCATION");
 
 
 	public Analyser(Model model) {
@@ -83,16 +83,16 @@ public class Analyser {
             	if (relationship!=null){
             		this.model.addRelationship(relationship);
 				}
-
-				this.currentContext.clearContextEntities();
-
-				for (CoreLabel cl: sentence.tokens()) {
-					Entity entity = (Entity) this.model.getModelObject(cl.originalText());
-					if(entity != null) {
-						this.currentContext.addContextEntities(entity);
-					}
-				}
 			}
+
+            for (CoreLabel cl: sentence.tokens()) {
+                Entity entity = (Entity) this.model.getModelObject(cl.originalText());
+                if(entity != null) {
+                    this.currentContext.addContextEntities(entity);
+                }
+            }
+
+            currentContext.removeDuplicateContextEntities();
             sentenceIndex++;
         }
         sentenceIndex--;
@@ -139,7 +139,7 @@ public class Analyser {
                 current_scene.addEntityToScene(found_entity);
             }
         } else if ((em.entityType().equals(this.location_identifier))) {
-        	this.model.addEntity(em, genders.get(2));
+        	this.model.addEntity(em, genders.get(3));
 		}
     }
 
@@ -319,6 +319,7 @@ public class Analyser {
 		ModelObject subject = findModelObjectFromReference(sentence, prospectiveRelationship.parentObject);
 		ModelObject  object = findModelObjectFromReference(sentence, prospectiveRelationship.childObject);
 		ModelObject  usingEntity = null;
+
 		if (prospectiveRelationship.usingObject != null){
 			usingEntity = findModelObjectFromReference(sentence, prospectiveRelationship.usingObject);
 			if (usingEntity == null){
@@ -404,6 +405,7 @@ public class Analyser {
 
     private ModelObject findModelObjectFromReference(CoreSentence sentence, IndexedWord possibleReference){
 		if(this.model.getModelObject(possibleReference.originalText()) == null && this.proper_noun_tags.contains(possibleReference.get(CoreAnnotations.PartOfSpeechAnnotation.class))) {
+
 			this.model.addEntity(possibleReference.originalText(), this.genders.get(2));
 
 			//retrieve entity object from model and add to scene

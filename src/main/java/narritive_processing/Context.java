@@ -39,16 +39,30 @@ public class Context {
     }
 
     public void addContextEntities(Entity entity) {
-        this.contextEntities.add(entity);
+        if(contextEntities.size() == 0 || contextEntities.get(contextEntities.size() - 1) != entity) {
+            this.contextEntities.add(entity);
 
-        if(entity.getGender().equals(Analyser.genders.get(0))) {
-            mostRecentFemale = entity;
-        } else if (entity.getGender().equals(Analyser.genders.get(1))) {
-            mostRecentMale = entity;
+            if(entity.getGender().equals(Analyser.genders.get(0))) {
+                mostRecentFemale = entity;
+            } else if (entity.getGender().equals(Analyser.genders.get(1))) {
+                mostRecentMale = entity;
+            }
         }
     }
 
-    public void clearContextEntities() { this.contextEntities.clear(); }
+    public void removeDuplicateContextEntities() {
+        if(contextEntities.size() < 2) {
+            return;
+        }
+
+        for (int i = 0; i < contextEntities.size(); i++) {
+            for (int j = i + 1; j < contextEntities.size(); j++) {
+                if (contextEntities.get(i) == contextEntities.get(j)) {
+                    contextEntities.remove(i);
+                }
+            }
+        }
+    }
 
     public ArrayList<ModelObject> getContextEntities() { return this.contextEntities; }
 
