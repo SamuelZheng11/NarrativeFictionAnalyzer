@@ -15,7 +15,7 @@ public class Context {
     private static ModelObject mostRecentModelObjectUpdated;
     private static ModelObject mostRecentFemale;
     private static ModelObject mostRecentMale;
-    private static ArrayList<ModelObject> contextEntities = new ArrayList<>();
+    private static ArrayList<ModelObject> contextEntities = new ArrayList<ModelObject>();
     private int segmentsAnalysed = 0;
 
     public static Context getContext() {
