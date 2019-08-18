@@ -12,8 +12,13 @@ public class Model {
     private List<Scene> scenes = new ArrayList<Scene>();
     private Map<String, String> aliasMap = new HashMap();
 
-    public Entity addEntity(CoreEntityMention em) {
-        Entity newEntity = new Entity(em.text());
+    public Entity addEntity(CoreEntityMention em, String gender) {
+        return this.addEntity(em.text(), gender);
+    }
+
+    public Entity addEntity(String emName, String gender) {
+
+        Entity newEntity = new Entity(emName, gender);
         this.entities.put(newEntity.getName(), newEntity);
         return newEntity;
     }
@@ -46,7 +51,7 @@ public class Model {
     public void addRelationship(Relationship relationship) {
         ModelObject subject;
         ModelObject object;
-        ModelObject using;
+        ModelObject using = null;
 
         //get subject
         if (this.entities.containsKey(relationship.getSubjectModelObject().getName())){
@@ -67,18 +72,18 @@ public class Model {
         }
 
         //get using
-        if (this.entities.containsKey(relationship.getUsingModelObject().getName())){
+        if (relationship.getUsingModelObject() != null && this.entities.containsKey(relationship.getUsingModelObject().getName())){
             using = this.entities.get(relationship.getUsingModelObject().getName());
-        }else if (this.locations.containsKey(relationship.getUsingModelObject().getName())){
+        }else if (relationship.getUsingModelObject() != null && this.locations.containsKey(relationship.getUsingModelObject().getName())){
             using = this.locations.get(relationship.getUsingModelObject().getName());
-        }else{
-            return;
         }
 
         //add relationship to model
         subject.addRelationship(relationship);
         object.addRelationship(relationship);
-        using.addRelationship(relationship);
+        if (using != null){
+            using.addRelationship(relationship);
+        }
         this.relationships.add(relationship);
     }
 

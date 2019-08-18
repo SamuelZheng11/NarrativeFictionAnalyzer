@@ -1,11 +1,9 @@
 package narritive_processing;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.pipeline.CoreDocument;
-import edu.stanford.nlp.pipeline.CoreEntityMention;
-import edu.stanford.nlp.pipeline.CoreQuote;
-import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -40,9 +38,13 @@ public class Analyser {
 	private String possessive_tag = "pos";
 	private String possessive_noun_modifier_relation = "nmod:poss";
 	private static String person_identifier = "PERSON";
+	private static String location_identifier = "STATE_OR_PROVINCE";
 	private static String misc_noun_identifier = "MISC";
-	private static List<String> internal_personal_pronoun = Arrays.asList("I", "ME");
-    private static List<String> external_personal_pronoun = Arrays.asList("THEY", "HE", "SHE", "HIM", "HER", "IT", "THEM");
+	private static List<String> internal_personal_pronoun = Arrays.asList("I", "ME", "MY", "OUR", "US", "WE");
+ 	private static List<String> external_female_pronoun = Arrays.asList("SHE", "HER");
+	private static List<String> external_male_pronoun = Arrays.asList("HE", "HIM", "HIS");
+	private static List<String> external_other_pronoun = Arrays.asList("THEY", "IT", "THEM");
+	public static List<String> genders = Arrays.asList("FEMALE", "MALE", "OTHER", "LOCATION");
 
 
 	public Analyser(Model model) {
@@ -60,15 +62,15 @@ public class Analyser {
 
         for (CoreSentence sentence : document.sentences()) {
         	BookLocation bookLocation = new BookLocation(currentContext.getSegmentsAnalysed(), sentenceIndex);
-            for (CoreEntityMention em: sentence.entityMentions()) {
-                if(isEntity(em)) {
-                    this.setContext((Entity) this.model.getModelObject(em.text()), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
-                }
-            }
+			for (CoreEntityMention em: sentence.entityMentions()) {
+				if(isEntity(em)) {
+					this.currentContext.overrideContext((Entity) this.model.getModelObject(em.text()));
+				}
+			}
 
 			RelationContainer sentenceRelations = this.findModifiersAndRelationships(sentence);
 
-            for (Modifier mod : sentenceRelations.modifiers) {
+			for (Modifier mod : sentenceRelations.modifiers) {
                 if(model.getModelObject(mod.subject.originalText()) != null) {
                     this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
                 } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
@@ -83,6 +85,14 @@ public class Analyser {
 				}
 			}
 
+            for (CoreLabel cl: sentence.tokens()) {
+                Entity entity = (Entity) this.model.getModelObject(cl.originalText());
+                if(entity != null) {
+                    this.currentContext.addContextEntities(entity);
+                }
+            }
+
+            currentContext.removeDuplicateContextEntities();
             sentenceIndex++;
         }
         sentenceIndex--;
@@ -93,27 +103,44 @@ public class Analyser {
     }
 
     private boolean isEntity(CoreEntityMention entityMention) {
-        if ((entityMention.entityType().equals(this.person_identifier) && !entityMention.entityTypeConfidences().containsKey("O")) || entityMention.entityType().equals(this.misc_noun_identifier)) {
+        if ((entityMention.entityType().equals(this.person_identifier) && !entityMention.entityTypeConfidences().containsKey("O")) || entityMention.entityType().equals(this.misc_noun_identifier) || this.proper_noun_tags.contains(entityMention.entityType())) {
             return true;
         }
 
         return false;
     }
 
+    private String identifyGender(CoreEntityMention entity) {
+        if(entity.coreMap().get(CoreAnnotations.GenderAnnotation.class) == null) {
+            return this.genders.get(2);
+        }
+
+        for (String gender: this.genders) {
+            if(entity.coreMap().get(CoreAnnotations.GenderAnnotation.class).equals(gender)) {
+                return gender;
+            }
+        }
+
+        return this.genders.get(2);
+    }
+
     private void processEntities(CoreEntityMention em, Scene current_scene){
         if(this.isEntity(em)) {
+            String entityGender = this.identifyGender(em);
             // if the model does not contain this character, add it
-            if (!this.currentContext.getEntity().getName().contains(em.text())) {
-                this.setContext(this.model.addEntity(em), this.currentContext.getLocation(), this.currentContext.getRelationship(), this.currentContext.getScene());
+            if ( this.currentContext.getContextEntity(entityGender) == null || !this.currentContext.getContextEntity(entityGender).getName().contains(em.text())) {
+                this.currentContext.overrideContext(this.model.addEntity(em, entityGender));
             } else {
-                model.addAlias(this.currentContext.getEntity().getName(), em.text());
+                model.addAlias(this.currentContext.getContextEntity(entityGender).getName(), em.text());
             }
             //retrieve entity object from model and add to scene
             Entity found_entity = (Entity) model.getModelObject(em.text());
             if (!current_scene.containsEntity(found_entity)){
                 current_scene.addEntityToScene(found_entity);
             }
-        }
+        } else if ((em.entityType().equals(this.location_identifier))) {
+        	this.model.addEntity(em, genders.get(3));
+		}
     }
 
     private void sceneMerge(Scene current_scene, BookLocation location){
@@ -123,13 +150,9 @@ public class Analyser {
         }else{
         	current_scene.setSceneEnd(location);
         	this.model.addScene(current_scene);
-        	this.currentContext.setContext(this.currentContext.getEntity(), this.currentContext.getLocation(), this.currentContext.getRelationship(), current_scene);
+        	this.currentContext.setScene(current_scene);
         	return;
         }
-    }
-
-    private void setContext(Entity entity, Location location, Relationship relationship, Scene scene) {
-        this.currentContext.setContext(entity, location, relationship, scene);
     }
 
     private RelationContainer findModifiersAndRelationships(CoreSentence sentence){
@@ -296,6 +319,7 @@ public class Analyser {
 		ModelObject subject = findModelObjectFromReference(sentence, prospectiveRelationship.parentObject);
 		ModelObject  object = findModelObjectFromReference(sentence, prospectiveRelationship.childObject);
 		ModelObject  usingEntity = null;
+
 		if (prospectiveRelationship.usingObject != null){
 			usingEntity = findModelObjectFromReference(sentence, prospectiveRelationship.usingObject);
 			if (usingEntity == null){
@@ -380,7 +404,66 @@ public class Analyser {
     }
 
     private ModelObject findModelObjectFromReference(CoreSentence sentence, IndexedWord possibleReference){
-		//TODO find entity for words referencing them. If it doesn't exist/matter, return null
+		if(this.model.getModelObject(possibleReference.originalText()) == null && this.proper_noun_tags.contains(possibleReference.get(CoreAnnotations.PartOfSpeechAnnotation.class))) {
+
+			this.model.addEntity(possibleReference.originalText(), this.genders.get(2));
+
+			//retrieve entity object from model and add to scene
+			Entity found_entity = (Entity) model.getModelObject(possibleReference.originalText());
+			if (!this.currentContext.getScene().containsEntity(found_entity)){
+				this.currentContext.getScene().addEntityToScene(found_entity);
+			}
+
+			return this.currentContext.getMostRecentModelObjectUpdated();
+		}
+
+
+		if(this.model.getModelObject(possibleReference.originalText()) != null) {
+			return this.model.getModelObject(possibleReference.originalText());
+		}
+
+		String gender = null;
+		if(this.external_female_pronoun.contains(possibleReference.originalText().toUpperCase())) {
+			gender = this.genders.get(0);
+		} else if (this.external_male_pronoun.contains(possibleReference.originalText().toUpperCase())) {
+			gender = this.genders.get(1);
+		} else if (this.external_other_pronoun.contains(possibleReference.originalText().toUpperCase())) {
+			gender = this.genders.get(2);
+		}
+
+		if (gender == null) {
+			return null;
+		} else if (possibleReference.index() == 0 && gender.equals(this.genders.get(2))) {
+			return this.currentContext.getMostRecentModelObjectUpdated();
+		}
+
+		for (int i = possibleReference.index(); i >= 0; i--) {
+			CoreLabel word = sentence.tokens().get(i);
+			Entity entity = (Entity) this.model.getModelObject(word.originalText());
+			if(entity != null && entity.getGender().equals(gender)) {
+				return entity;
+			}
+		}
+
+		for (int i = 0; i < possibleReference.index(); i++) {
+			CoreLabel word = sentence.tokens().get(i);
+			Entity entity = (Entity) this.model.getModelObject(word.originalText());
+			if(entity != null && entity.getGender().equals(this.genders.get(2))) {
+				return entity;
+			}
+		}
+
+		List<ModelObject> contextEntities = this.currentContext.getContextEntities();
+
+		for (int i = contextEntities.size() - 1; i >= 0; i--) {
+			Entity entity = (Entity) contextEntities.get(i);
+			if(entity.getGender() == gender) {
+				return entity;
+			} else if (entity.getGender().equals(this.genders.get(2))) {
+				return entity;
+			}
+		}
+
 		return null;
 	}
 

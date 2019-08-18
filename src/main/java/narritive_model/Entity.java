@@ -5,14 +5,16 @@ import java.util.Set;
 
 public class Entity implements ModelObject {
     private String name;
+    private String gender;
     private Set<String> aliases = new HashSet<String>();
     private Set<Relationship> relationshipSet = new HashSet<Relationship>();
     private Set<Scene> sceneAppearances = new HashSet<Scene>();
     private Set<String> modifiers = new HashSet<String>();
     private Long linesOfDialogue = new Long(0);
 
-    public Entity(String name) {
+    public Entity(String name, String gender) {
         this.name = name;
+        this.gender = gender;
     }
 
     public String getName() {
@@ -38,6 +40,8 @@ public class Entity implements ModelObject {
     public void addModifier(String modifier) {
         this.modifiers.add(modifier);
     }
+
+    public String getGender() { return this.gender; }
 
     public void increaseLinesOfDialogue() {
         this.linesOfDialogue = ++this.linesOfDialogue;
