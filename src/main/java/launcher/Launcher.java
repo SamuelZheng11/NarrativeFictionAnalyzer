@@ -88,8 +88,8 @@ public class Launcher {
     }
 
     private static String interpretHTMLLine(String line){
-		if (line.contains("<p>")){
-			line = line.replaceAll("(?s)^.*?<p>", "");
+		if (line.contains("<p")){
+			line = line.replaceAll("(?s)^.*?<p[^>]*", "<");
 			line = line.replace("</p>", "\n");
 			line = line.replaceAll("<[^>]*>", "");
 			line = line.replaceAll("(\\n)+", "\n");
