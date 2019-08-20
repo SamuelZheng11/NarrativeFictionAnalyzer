@@ -74,10 +74,7 @@ public class Launcher {
         }
 
         while (line != null){
-            line = interpretHTMLLine(line);
-            if (line != null){
-            	document = document.concat(line);
-			}
+            	document = document.concat(line + "\n");
             try {
                 line = file.readLine();
             } catch (IOException e) {
@@ -135,7 +132,9 @@ public class Launcher {
 			if (StringUtils.countMatches(chunks[i],".") < 3 || chunks[i].length() < 200){
 				previousChunk.concat(chunks[i]);
 			}else{
-				paragraphs.add(previousChunk);
+				if (!previousChunk.equals("")){
+					paragraphs.add(previousChunk);
+				}
 				previousChunk = chunks[i];
 			}
 		}
