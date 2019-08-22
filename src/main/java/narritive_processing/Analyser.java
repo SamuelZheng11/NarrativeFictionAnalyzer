@@ -174,36 +174,56 @@ public class Analyser {
 
         //get all word edges in the dep graph
         List<SemanticGraphEdge> words = dependencies.edgeListSorted();
-        for (SemanticGraphEdge word : words){
-			if (!wordsNotInSpeech.contains(word.getTarget().originalText())){
+		Collection<IndexedWord> roots = dependencies.getRoots();
+		Iterator<IndexedWord> rootsIter = roots.iterator();
+		for (int i = 0; i < words.size()+roots.size(); i++) {
+			boolean isRoot;
+			SemanticGraphEdge edge;
+			IndexedWord word;
+			String relation;
+			String tag;
+			if(i<words.size()){
+				isRoot = false;
+				edge = words.get(i);
+				relation = edge.getRelation().getShortName();
+				tag = edge.getTarget().tag();
+				word = edge.getTarget();
+			}else{
+				isRoot = true;
+				edge = dependencies.getOutEdgesSorted(rootsIter.next()).get(0);
+				relation = "";
+				tag = edge.getSource().tag();
+				word = edge.getSource();
+			}
+
+
+			if (!wordsNotInSpeech.contains(word.originalText())){
 				continue;
 			}
 
-            String relation = word.getRelation().getShortName();
-            String tag = word.getTarget().tag();
 
-            // if word is an adverb, attach to word to be adjusted
+            // if edge is an adverb, attach to edge to be adjusted
 			if (adverb_tags.contains(tag)){
 				if (relation.equals(negation_relation) || relation.equals(adverbial_modifier_relation)){
-					if (noun_group_tags.contains(word.getSource().tag()) || word.getSource().tag().equals(adjective_tag) || adverb_tags.contains(word.getSource().tag())){
-						if (!adjustments.containsKey(word.getSource().word())){
-							adjustments.put(word.getSource().word(), new ArrayList<String>());
+					if (noun_group_tags.contains(edge.getSource().tag()) || edge.getSource().tag().equals(adjective_tag) || adverb_tags.contains(edge.getSource().tag())){
+						if (!adjustments.containsKey(edge.getSource().word())){
+							adjustments.put(edge.getSource().word(), new ArrayList<String>());
 						}
-						adjustments.get(word.getSource().word()).add(word.getTarget().word());
+						adjustments.get(edge.getSource().word()).add(edge.getTarget().word());
 					}
 				}
 				continue;
 			}
 
-            //if word is adjective find matching noun group word
+            //if edge is adjective find matching noun group edge
             else if (tag.equals(adjective_tag) || (relation.equals(relative_clause_relation) && noun_tags.contains(tag))){
 
                 if (relation.equals(adjectival_modifier_relation)){
-                	if (word.getSource().tag().matches("JJ.") || adverb_tags.contains(word.getSource().tag())){
-						if (!adjustments.containsKey(word.getSource().word())){
-							adjustments.put(word.getSource().word(), new ArrayList<String>());
+                	if (edge.getSource().tag().matches("JJ.") || adverb_tags.contains(edge.getSource().tag())){
+						if (!adjustments.containsKey(edge.getSource().word())){
+							adjustments.put(edge.getSource().word(), new ArrayList<String>());
 						}
-						adjustments.get(word.getSource().word()).add(word.getTarget().word());
+						adjustments.get(edge.getSource().word()).add(edge.getTarget().word());
 					}
 					continue;
                 }
@@ -211,23 +231,23 @@ public class Analyser {
                 List<NounCandidate> nounCandidates = new ArrayList<NounCandidate>();
 
                 //Check children for noun candidates
-                List<SemanticGraphEdge> outgoingEdges = dependencies.getOutEdgesSorted(word.getTarget());
-                for (SemanticGraphEdge edge : outgoingEdges){
-                    if (noun_group_tags.contains(edge.getTarget().tag())){
-                        nounCandidates.add(new NounCandidate(edge.getTarget(), edge.getRelation()));
+                List<SemanticGraphEdge> outgoingEdges = dependencies.getOutEdgesSorted(word);
+                for (SemanticGraphEdge outgoingEdge : outgoingEdges){
+                    if (noun_group_tags.contains(outgoingEdge.getTarget().tag())){
+                        nounCandidates.add(new NounCandidate(outgoingEdge.getTarget(), outgoingEdge.getRelation()));
                     }
                 }
-				if (addCandidate(modifiers, word, nounCandidates))
+				if (addCandidate(modifiers, edge, nounCandidates))
 					continue;
 
 				//if no noun candidate check parents
-                List<SemanticGraphEdge> incomingEdges = dependencies.getIncomingEdgesSorted(word.getTarget());
+                List<SemanticGraphEdge> incomingEdges = dependencies.getIncomingEdgesSorted(word);
                 for (SemanticGraphEdge incomingEdge : incomingEdges){
                     if (noun_group_tags.contains(incomingEdge.getSource().tag())){
                         nounCandidates.add(new NounCandidate(incomingEdge.getSource(), incomingEdge.getRelation()));
                     }
                 }
-				if (addCandidate(modifiers, word, nounCandidates))
+				if (addCandidate(modifiers, edge, nounCandidates))
 					continue;
 
 				//finally check siblings
@@ -239,13 +259,13 @@ public class Analyser {
                         }
                     }
                 }
-				if (addCandidate(modifiers, word, nounCandidates))
+				if (addCandidate(modifiers, edge, nounCandidates))
 					continue;
 			}
 			//Here begin looking for relationships
-			//if the word is a verb and does not have the anti-relationships
+			//if the edge is a verb and does not have the anti-relationships
 			else if(tag.startsWith(verb_tag) && !(relation.equals(copula_relation) || relation.equals(passive_auxiliary_relation))){
-				List<SemanticGraphEdge> wordChildren = dependencies.getOutEdgesSorted(word.getTarget());
+				List<SemanticGraphEdge> wordChildren = dependencies.getOutEdgesSorted(word);
 				ProspectiveRelationship relationship = new ProspectiveRelationship();
 				relationship.isPossessive = false;
 				IndexedWord directObject = null;
@@ -265,34 +285,37 @@ public class Analyser {
 
 					if (directObject == null){
 						relationship.childObject = indirectObject;
-					}else{
+					}else if (indirectObject == null){
 						relationship.childObject = directObject;
 						relationship.usingObject = indirectObject;
+					}else{
+						relationship.usingObject = directObject;
+						relationship.childObject = indirectObject;
 					}
 
 					String description = "";
-					if (adjustments.containsKey(word.getTarget())){
-						List<String> changes = adjustments.get(word.getSource().word());
+					if (adjustments.containsKey(word)){
+						List<String> changes = adjustments.get(edge.getSource().word());
 						for (String change : changes){
 							description += change + " ";
 						}
 					}
-					description += word.getTarget().word();
+					description += word.word();
 					relationship.description = description;
 
 					relationships.add(relationship);
 				}
 			}
 
-			//if the word is a possessive, find the matching relationship
+			//if the edge is a possessive, find the matching relationship
 			else if(relation.equals(possessive_noun_modifier_relation)){
 				ProspectiveRelationship relationship = new ProspectiveRelationship();
-				relationship.parentObject = word.getTarget();
-				relationship.childObject = word.getSource();
+				relationship.parentObject = edge.getTarget();
+				relationship.childObject = edge.getSource();
 				relationship.isPossessive = true;
 				String description = "";
-				if (adjustments.containsKey(word.getSource())){
-					List<String> changes = adjustments.get(word.getSource().word());
+				if (adjustments.containsKey(edge.getSource())){
+					List<String> changes = adjustments.get(edge.getSource().word());
 					for (String change : changes){
 						description += change + " ";
 					}
