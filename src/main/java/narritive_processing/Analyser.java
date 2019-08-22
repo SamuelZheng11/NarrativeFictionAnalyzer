@@ -75,7 +75,9 @@ public class Analyser {
                     this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
                 } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
                     this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
-                }
+                } else{
+                	findModelObjectFromReference(sentence, mod.subject).addModifier(mod.modifier);
+				}
             }
 
             for (ProspectiveRelationship rel : sentenceRelations.relationships){
