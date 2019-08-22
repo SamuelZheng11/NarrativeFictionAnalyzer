@@ -239,7 +239,7 @@ public class Analyser {
                         nounCandidates.add(new NounCandidate(outgoingEdge.getTarget(), outgoingEdge.getRelation()));
                     }
                 }
-				if (addCandidate(modifiers, edge, nounCandidates))
+				if (addCandidate(modifiers, edge, nounCandidates, word))
 					continue;
 
 				//if no noun candidate check parents
@@ -249,7 +249,7 @@ public class Analyser {
                         nounCandidates.add(new NounCandidate(incomingEdge.getSource(), incomingEdge.getRelation()));
                     }
                 }
-				if (addCandidate(modifiers, edge, nounCandidates))
+				if (addCandidate(modifiers, edge, nounCandidates, word))
 					continue;
 
 				//finally check siblings
@@ -261,7 +261,7 @@ public class Analyser {
                         }
                     }
                 }
-				if (addCandidate(modifiers, edge, nounCandidates))
+				if (addCandidate(modifiers, edge, nounCandidates, word))
 					continue;
 			}
 			//Here begin looking for relationships
@@ -362,11 +362,11 @@ public class Analyser {
 		}
 	}
 
-	private boolean addCandidate(List<Modifier> modifiers, SemanticGraphEdge word, List<NounCandidate> nounCandidates) {
+	private boolean addCandidate(List<Modifier> modifiers, SemanticGraphEdge edge, List<NounCandidate> nounCandidates, IndexedWord word) {
 		if (!nounCandidates.isEmpty()){
-			IndexedWord candidate = this.pickCandidate(nounCandidates, word);
+			IndexedWord candidate = this.pickCandidate(nounCandidates, edge);
 			if (candidate != null){
-				modifiers.add(new Modifier(candidate, word.getTarget().word()));
+				modifiers.add(new Modifier(candidate, word.word()));
 			}
 			return true;
 		}
