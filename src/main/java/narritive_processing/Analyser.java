@@ -346,7 +346,7 @@ public class Analyser {
 		if (prospectiveRelationship.usingObject != null){
 			usingEntity = findModelObjectFromReference(sentence, prospectiveRelationship.usingObject);
 			if (usingEntity == null){
-				prospectiveRelationship.description += prospectiveRelationship.usingObject.word();
+				prospectiveRelationship.description += " " + prospectiveRelationship.usingObject.word();
 			}
 		}
 		if (subject == null || object == null){
