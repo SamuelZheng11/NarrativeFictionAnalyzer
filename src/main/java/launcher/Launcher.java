@@ -74,10 +74,7 @@ public class Launcher {
         }
 
         while (line != null){
-            line = interpretHTMLLine(line);
-            if (line != null){
-            	document = document.concat(line);
-			}
+            	document = document.concat(line + "\n");
             try {
                 line = file.readLine();
             } catch (IOException e) {
@@ -88,8 +85,8 @@ public class Launcher {
     }
 
     private static String interpretHTMLLine(String line){
-		if (line.contains("<p>")){
-			line = line.replaceAll("(?s)^.*?<p>", "");
+		if (line.contains("<p")){
+			line = line.replaceAll("(?s)^.*?<p[^>]*", "<");
 			line = line.replace("</p>", "\n");
 			line = line.replaceAll("<[^>]*>", "");
 			line = line.replaceAll("(\\n)+", "\n");
@@ -135,7 +132,9 @@ public class Launcher {
 			if (StringUtils.countMatches(chunks[i],".") < 3 || chunks[i].length() < 200){
 				previousChunk.concat(chunks[i]);
 			}else{
-				paragraphs.add(previousChunk);
+				if (!previousChunk.equals("")){
+					paragraphs.add(previousChunk);
+				}
 				previousChunk = chunks[i];
 			}
 		}
