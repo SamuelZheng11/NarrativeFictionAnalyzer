@@ -41,6 +41,14 @@ public class Entity implements ModelObject {
         this.modifiers.add(modifier);
     }
 
+    public Set<String> getModifiers() {
+        return modifiers;
+    }
+
+    public Long getLinesOfDialogue() {
+        return linesOfDialogue;
+    }
+
     public String getGender() { return this.gender; }
 
     public void increaseLinesOfDialogue() {
