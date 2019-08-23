@@ -195,7 +195,12 @@ public class Analyser {
 				word = edge.getTarget();
 			}else{
 				isRoot = true;
-				edge = dependencies.getOutEdgesSorted(rootsIter.next()).get(0);
+				List<SemanticGraphEdge> nextRoot = dependencies.getOutEdgesSorted(rootsIter.next());
+				if (!nextRoot.isEmpty()){
+					edge = nextRoot.get(0);
+				}else{
+					continue;
+				}
 				relation = "";
 				tag = edge.getSource().tag();
 				word = edge.getSource();
