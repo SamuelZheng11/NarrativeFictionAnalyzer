@@ -25,7 +25,7 @@
          <children>
             <ImageView fitHeight="411.0" fitWidth="502.0" layoutX="-10.0">
                <image>
-                  <Image url="@../../../dYiavp.png" />
+                  <Image url="../../resources/dYiavp.png" />
                </image>
             </ImageView>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffffffe6" height="422.0" layoutX="-17.0" layoutY="-7.0" stroke="BLACK" strokeType="INSIDE" width="521.0" />
