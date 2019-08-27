@@ -1,6 +1,6 @@
-package narritive_processing;
+package analyser.narritive_processing;
 
-import narritive_model.*;
+import analyser.narritive_model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -14,10 +14,12 @@ public class UIMainMenuController {
     @FXML
     public Button readFromFileButton;
 
+    @FXML
     public void setManualTextScene(ActionEvent event) throws IOException {
         new SceneLoader().loadScene(UIConstants.manualFilename + UIConstants.fxmlSuffix, event);
     }
 
+    @FXML
     public void setWorkInProgressScene(ActionEvent event) throws IOException {
         new SceneLoader().loadScene(UIConstants.analysingFilename + UIConstants.fxmlSuffix, event);
     }

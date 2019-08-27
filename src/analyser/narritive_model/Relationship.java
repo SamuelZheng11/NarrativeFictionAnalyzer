@@ -1,4 +1,4 @@
-package narritive_model;
+package analyser.narritive_model;
 
 public class Relationship {
     private ModelObject subjectModelObject;

@@ -1,11 +1,10 @@
-package launcher;
+package analyser.launcher;
 
+import analyser.narritive_model.Model;
+import analyser.narritive_processing.Analyser;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import narritive_model.Model;
-import narritive_processing.Analyser;
 import nl.siegmann.epublib.domain.Book;
-import nl.siegmann.epublib.domain.MediaType;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.Spine;
 import nl.siegmann.epublib.epub.EpubReader;
@@ -34,7 +33,7 @@ public class Launcher {
         LocalDateTime time = LocalDateTime.now();
 
         //Document text to be parsed in can be sourced from a local variable, makeDocumentFromTextfile, or makeDocumentFromEpub
-		Model model = analyseDocument(documentText);
+		Model model = analyseDocument(args[0]);
 
 		LocalDateTime finish = LocalDateTime.now();
 		finish = finish.minusSeconds(time.getSecondOfMinute());

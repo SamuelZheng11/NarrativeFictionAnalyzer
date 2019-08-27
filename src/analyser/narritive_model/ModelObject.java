@@ -1,4 +1,4 @@
-package narritive_model;
+package analyser.narritive_model;
 
 import java.util.Set;
 
