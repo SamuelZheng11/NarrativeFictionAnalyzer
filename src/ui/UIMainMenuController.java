@@ -17,4 +17,8 @@ public class UIMainMenuController {
     public void setManualTextScene(ActionEvent event) throws IOException {
         new SceneLoader().loadScene(UIConstants.manualFilename + UIConstants.fxmlSuffix, event);
     }
+
+    public void setWorkInProgressScene(ActionEvent event) throws IOException {
+        new SceneLoader().loadScene(UIConstants.analysingFilename + UIConstants.fxmlSuffix, event);
+    }
 }

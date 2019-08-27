@@ -20,23 +20,23 @@
       <RowConstraints />
    </rowConstraints>
    <children>
-      <AnchorPane prefHeight="500.0" prefWidth="500.0" GridPane.columnIndex="1">
+      <AnchorPane maxHeight="500.0" maxWidth="500.0" minHeight="500.0" minWidth="500.0" prefHeight="500.0" prefWidth="500.0" GridPane.columnIndex="1">
          <children>
-            <ImageView fitHeight="411.0" fitWidth="514.0" layoutX="-12.0" layoutY="-1.0" pickOnBounds="true">
+            <ImageView fitHeight="525.0" fitWidth="523.0" layoutX="-23.0" layoutY="-15.0" pickOnBounds="true">
                <image>
                   <Image url="@../../resources/dYiavp.png" />
                </image>
             </ImageView>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#eeeeeee8" height="411.0" layoutX="-11.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="514.0" />
-            <Button fx:id="readFromFileButton" layoutX="94.0" layoutY="323.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="300.0" text="Read in narrative from file" />
-            <Button fx:id="ePubButton" layoutX="94.0" layoutY="260.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="300.0" text="Get narrative from ePub" />
-            <Button fx:id="typeInButton" layoutX="94.0" layoutY="198.0" mnemonicParsing="false" onAction="#setManualTextScene" prefHeight="50.0" prefWidth="300.0" text="Type in your own narrative fiction" />
-            <Text layoutX="41.0" layoutY="101.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Narrative Fiction Analyzer">
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffffffe8" height="515.0" layoutX="-23.0" layoutY="-15.0" opacity="0.91" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="523.0" />
+            <Button fx:id="readFromFileButton" layoutX="94.0" layoutY="356.0" mnemonicParsing="false" onAction="#setWorkInProgressScene" prefHeight="50.0" prefWidth="300.0" text="Read in narrative from file" />
+            <Button fx:id="ePubButton" layoutX="94.0" layoutY="293.0" mnemonicParsing="false" onAction="#setWorkInProgressScene" prefHeight="50.0" prefWidth="300.0" text="Get narrative from ePub" />
+            <Button fx:id="typeInButton" layoutX="94.0" layoutY="231.0" mnemonicParsing="false" onAction="#setManualTextScene" prefHeight="50.0" prefWidth="300.0" text="Type in your own narrative fiction" />
+            <Text layoutX="41.0" layoutY="134.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Narrative Fiction Analyzer">
                <font>
                   <Font size="37.0" />
                </font>
             </Text>
-            <Text layoutX="103.0" layoutY="132.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(Please Choose from the selecitons below)">
+            <Text layoutX="103.0" layoutY="165.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(Please Choose from the selecitons below)">
                <font>
                   <Font size="16.0" />
                </font>

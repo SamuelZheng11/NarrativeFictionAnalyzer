@@ -27,8 +27,4 @@ public class UILauncher extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
     }
-
-    public void startAnaalyser() {
-        Launcher.main(null);
-    }
 }
