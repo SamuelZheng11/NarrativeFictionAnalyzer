@@ -11,8 +11,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-
-<GridPane alignment="center" hgap="10" prefHeight="411.0" prefWidth="502.0" vgap="10" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/9" fx:controller="ui.UiController">
+<GridPane alignment="center" hgap="10" prefHeight="411.0" prefWidth="502.0" vgap="10" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.UIMainMenuController">
    <columnConstraints>
       <ColumnConstraints />
       <ColumnConstraints />
@@ -23,15 +22,15 @@
    <children>
       <AnchorPane prefHeight="500.0" prefWidth="500.0" GridPane.columnIndex="1">
          <children>
-            <ImageView fitHeight="411.0" fitWidth="502.0" layoutX="-10.0">
+            <ImageView fitHeight="411.0" fitWidth="514.0" layoutX="-12.0" layoutY="-1.0" pickOnBounds="true">
                <image>
-                  <Image url="../../resources/dYiavp.png" />
+                  <Image url="@../../resources/dYiavp.png" />
                </image>
             </ImageView>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffffffe6" height="422.0" layoutX="-17.0" layoutY="-7.0" stroke="BLACK" strokeType="INSIDE" width="521.0" />
-            <Button fx:id="readFromFileButton" layoutX="100.0" layoutY="319.0" mnemonicParsing="false" onAction="#startAnaalyser" prefHeight="50.0" prefWidth="300.0" text="Read in narrative from file" />
-            <Button fx:id="ePubButton" layoutX="100.0" layoutY="263.0" mnemonicParsing="false" onAction="#startAnaalyser" prefHeight="50.0" prefWidth="300.0" text="Get narrative from ePub" />
-            <Button fx:id="typeInButton" layoutX="100.0" layoutY="206.0" mnemonicParsing="false" onAction="#startAnaalyser" prefHeight="50.0" prefWidth="300.0" text="Type in your own narrative fiction" />
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#eeeeeee8" height="411.0" layoutX="-11.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="514.0" />
+            <Button fx:id="readFromFileButton" layoutX="94.0" layoutY="323.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="300.0" text="Read in narrative from file" />
+            <Button fx:id="ePubButton" layoutX="94.0" layoutY="260.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="300.0" text="Get narrative from ePub" />
+            <Button fx:id="typeInButton" layoutX="94.0" layoutY="198.0" mnemonicParsing="false" onAction="#setManualTextScene" prefHeight="50.0" prefWidth="300.0" text="Type in your own narrative fiction" />
             <Text layoutX="41.0" layoutY="101.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Narrative Fiction Analyzer">
                <font>
                   <Font size="37.0" />
