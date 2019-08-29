@@ -1,9 +1,10 @@
 package narritive_model;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Location implements ModelObject {
+public class Location implements ModelObject, Serializable {
     private String name;
     private Set<Relationship> relationshipSet = new HashSet<Relationship>();
     private Set<Scene> sceneAppearances = new HashSet<Scene>();

@@ -1,9 +1,10 @@
 package narritive_model;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Entity implements ModelObject {
+public class Entity implements ModelObject, Serializable {
     private String name;
     private String gender;
     private Set<String> aliases = new HashSet<String>();

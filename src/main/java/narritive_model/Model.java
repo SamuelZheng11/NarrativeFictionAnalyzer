@@ -2,10 +2,11 @@ package narritive_model;
 
 import edu.stanford.nlp.pipeline.CoreEntityMention;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.HashMap;
 
-public class Model {
+public class Model implements Serializable {
     private Map<String, Entity> entities = new HashMap<String, Entity>();
     private Map<String, Location> locations = new HashMap<String, Location>();
     private List<Relationship> relationships = new ArrayList<Relationship>();
