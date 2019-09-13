@@ -30,16 +30,21 @@ public class Launcher {
     
     public static void main(String[] args) {
 
-        LocalDateTime time = LocalDateTime.now();
+		new Launcher().Start("Dorothy is a girl.");
+	}
 
-        //Document text to be parsed in can be sourced from a local variable, makeDocumentFromTextfile, or makeDocumentFromEpub
-		Model model = analyseDocument(args[0]);
+	public Model Start(String paragraph) {
+		LocalDateTime time = LocalDateTime.now();
+
+		//Document text to be parsed in can be sourced from a local variable, makeDocumentFromTextfile, or makeDocumentFromEpub
+		Model model = analyseDocument(paragraph);
 
 		LocalDateTime finish = LocalDateTime.now();
 		finish = finish.minusSeconds(time.getSecondOfMinute());
 		finish = finish.minusHours(time.getHourOfDay());
 		finish = finish.minusMinutes(time.getMinuteOfHour());
 		System.out.println(finish.getHourOfDay() + "hours: " + finish.getMinuteOfHour() + "minutes: "+ finish.getSecondOfMinute() + "seconds");
+		return model;
 	}
 
 	private static String makeDocumentFromEpub(String fileName) throws IOException {

@@ -28,7 +28,7 @@
                   <Font size="25.0" />
                </font>
             </Text>
-            <TextArea layoutX="103.0" layoutY="150.0" prefHeight="188.0" prefWidth="295.0" />
+            <TextArea fx:id="textArea" layoutX="103.0" layoutY="150.0" prefHeight="188.0" prefWidth="295.0" />
          </children>
       </AnchorPane>
    </children>
