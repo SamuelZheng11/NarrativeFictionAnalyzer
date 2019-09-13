@@ -70,15 +70,15 @@ public class Analyser {
 
 			RelationContainer sentenceRelations = this.findModifiersAndRelationships(sentence);
 
-			for (Modifier mod : sentenceRelations.modifiers) {
+			for (ProspectiveModifier mod : sentenceRelations.prospectiveModifiers) {
                 if(model.getModelObject(mod.subject.originalText()) != null) {
-                    this.model.getModelObject(mod.subject.originalText()).addModifier(mod.modifier);
+                    this.model.getModelObject(mod.subject.originalText()).addModifier(new Modifier(mod.modifier, bookLocation));
                 } else if(mod.subject.tag().equals(preferred_noun_tags.get(2)) && internal_personal_pronoun.contains(mod.subject.originalText().toUpperCase())) {
-                    this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(mod.modifier);
+                    this.model.getModelObject(this.currentContext.getMostRecentModelObjectUpdated().getName()).addModifier(new Modifier(mod.modifier, bookLocation));
                 } else{
 					ModelObject entity = findModelObjectFromReference(sentence, mod.subject);
                 	if (entity != null){
-                		entity.addModifier(mod.modifier);
+                		entity.addModifier(new Modifier(mod.modifier, bookLocation));
 					}
 				}
             }
@@ -163,7 +163,7 @@ public class Analyser {
     private RelationContainer findModifiersAndRelationships(CoreSentence sentence){
 		SemanticGraph dependencies = sentence.dependencyParse();
 
-		List<Modifier> modifiers = new ArrayList<Modifier>();
+		List<ProspectiveModifier> prospectiveModifiers = new ArrayList<ProspectiveModifier>();
 		List<ProspectiveRelationship> relationships = new ArrayList<ProspectiveRelationship>();
 
         HashMap<String, List<String>> adjustments = new HashMap<String, List<String>>();
@@ -247,7 +247,7 @@ public class Analyser {
                         nounCandidates.add(new NounCandidate(outgoingEdge.getTarget(), outgoingEdge.getRelation()));
                     }
                 }
-				if (addCandidate(modifiers, edge, nounCandidates, word))
+				if (addCandidate(prospectiveModifiers, edge, nounCandidates, word))
 					continue;
 
 				//if no noun candidate check parents
@@ -257,7 +257,7 @@ public class Analyser {
                         nounCandidates.add(new NounCandidate(incomingEdge.getSource(), incomingEdge.getRelation()));
                     }
                 }
-				if (addCandidate(modifiers, edge, nounCandidates, word))
+				if (addCandidate(prospectiveModifiers, edge, nounCandidates, word))
 					continue;
 
 				//finally check siblings
@@ -269,7 +269,7 @@ public class Analyser {
                         }
                     }
                 }
-				if (addCandidate(modifiers, edge, nounCandidates, word))
+				if (addCandidate(prospectiveModifiers, edge, nounCandidates, word))
 					continue;
 			}
 			//Here begin looking for relationships
@@ -337,7 +337,7 @@ public class Analyser {
 			}
 
         }
-        for (Modifier mod : modifiers){
+        for (ProspectiveModifier mod : prospectiveModifiers){
         	if (adjustments.containsKey(mod.modifier)){
         		Collections.reverse(adjustments.get((mod.modifier)));
         		for (String change : adjustments.get(mod.modifier)){
@@ -345,7 +345,7 @@ public class Analyser {
 				}
 			}
 		}
-        return new RelationContainer(modifiers, relationships);
+        return new RelationContainer(prospectiveModifiers, relationships);
     }
 
     private Relationship processRelationship(CoreSentence sentence, ProspectiveRelationship prospectiveRelationship, BookLocation location){
@@ -370,11 +370,11 @@ public class Analyser {
 		}
 	}
 
-	private boolean addCandidate(List<Modifier> modifiers, SemanticGraphEdge edge, List<NounCandidate> nounCandidates, IndexedWord word) {
+	private boolean addCandidate(List<ProspectiveModifier> prospectiveModifiers, SemanticGraphEdge edge, List<NounCandidate> nounCandidates, IndexedWord word) {
 		if (!nounCandidates.isEmpty()){
 			IndexedWord candidate = this.pickCandidate(nounCandidates, edge);
 			if (candidate != null){
-				modifiers.add(new Modifier(candidate, word.word()));
+				prospectiveModifiers.add(new ProspectiveModifier(candidate, word.word()));
 			}
 			return true;
 		}
@@ -515,19 +515,19 @@ public class Analyser {
 	}
 
 	private class RelationContainer{
-		public List<Modifier> modifiers;
+		public List<ProspectiveModifier> prospectiveModifiers;
 		public List<ProspectiveRelationship> relationships;
 
-		public RelationContainer(List<Modifier> modifiers, List<ProspectiveRelationship> relationships){
-			this.modifiers = modifiers;
+		public RelationContainer(List<ProspectiveModifier> prospectiveModifiers, List<ProspectiveRelationship> relationships){
+			this.prospectiveModifiers = prospectiveModifiers;
 			this.relationships = relationships;
 		}
 	}
 
-	private class Modifier {
+	private class ProspectiveModifier {
 		public IndexedWord subject;
 		public String modifier;
-		public Modifier(IndexedWord subject, String modifier) {
+		public ProspectiveModifier(IndexedWord subject, String modifier) {
 			this.subject = subject;
 			this.modifier = modifier;
 		}

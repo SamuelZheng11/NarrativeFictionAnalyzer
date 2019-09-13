@@ -21,7 +21,7 @@ public class Location implements ModelObject {
         this.sceneAppearances.add(scene);
     }
 
-    public void addModifier(String modifier) {
+    public void addModifier(Modifier modifier) {
         this.modifiers.add(modifier);
     }
 
