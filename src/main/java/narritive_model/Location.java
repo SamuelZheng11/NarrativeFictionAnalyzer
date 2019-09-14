@@ -7,7 +7,7 @@ public class Location implements ModelObject {
     private String name;
     private Set<Relationship> relationshipSet = new HashSet<Relationship>();
     private Set<Scene> sceneAppearances = new HashSet<Scene>();
-    private Set<String> modifiers = new HashSet<String>();
+    private Set<Modifier> modifiers = new HashSet<Modifier>();
 
     public Location(String name) {
         this.name = name;
@@ -37,7 +37,7 @@ public class Location implements ModelObject {
         return sceneAppearances;
     }
 
-    public Set<String> getModifiers() {
+    public Set<Modifier> getModifiers() {
         return modifiers;
     }
 }
