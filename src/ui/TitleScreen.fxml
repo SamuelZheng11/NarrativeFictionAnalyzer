@@ -21,20 +21,20 @@
       <AnchorPane layoutX="-5.0" layoutY="-5.0" maxHeight="500.0" maxWidth="500.0" minHeight="500.0" minWidth="500.0" prefHeight="500.0" prefWidth="500.0" style="-fx-background-image: url(&quot;./ui/words.jpg&quot;);">
          <children>
             <Rectangle fill="#ffffffe8" height="500.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="500.0" />
-            <Button fx:id="readFromFileButton" layoutX="94.0" layoutY="356.0" mnemonicParsing="false" onAction="#setWorkInProgressScene" prefHeight="50.0" prefWidth="300.0" text="Read in narrative from file" />
-            <Button fx:id="ePubButton" layoutX="94.0" layoutY="293.0" mnemonicParsing="false" onAction="#setWorkInProgressScene" prefHeight="50.0" prefWidth="300.0" text="Get narrative from ePub" />
+            <Button fx:id="readFromFileButton" layoutX="94.0" layoutY="356.0" mnemonicParsing="false" onAction="#setReadFromTextFileScene" prefHeight="50.0" prefWidth="300.0" text="Read in narrative from file" />
+            <Button fx:id="ePubButton" layoutX="94.0" layoutY="293.0" mnemonicParsing="false" onAction="#setLoadEPubScene" prefHeight="50.0" prefWidth="300.0" text="Get narrative from ePub" />
             <Button fx:id="typeInButton" layoutX="94.0" layoutY="231.0" mnemonicParsing="false" onAction="#setManualTextScene" prefHeight="50.0" prefWidth="300.0" text="Type in your own narrative fiction" />
             <Text layoutX="41.0" layoutY="134.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Narrative Fiction Analyzer">
                <font>
                   <Font size="37.0" />
                </font>
             </Text>
-            <Text layoutX="103.0" layoutY="165.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(Please Choose from the selecitons below)">
+            <Text layoutX="103.0" layoutY="165.0" strokeType="OUTSIDE" strokeWidth="0.0" text="(Please Choose from the selections below)">
                <font>
                   <Font size="16.0" />
                </font>
             </Text>
-            <Button fx:id="readFromFileButton1" layoutX="94.0" layoutY="418.0" mnemonicParsing="false" onAction="#setLoadModelScene" prefHeight="50.0" prefWidth="300.0" text="Load model" />
+            <Button fx:id="readFromFileButton1" layoutX="94.0" layoutY="418.0" mnemonicParsing="false" onAction="#setLoadModelScene" prefHeight="50.0" prefWidth="300.0" text="Load existing model" />
          </children>
       </AnchorPane>
    </children>

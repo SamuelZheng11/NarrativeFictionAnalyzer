@@ -15,6 +15,7 @@ public class UILauncher extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource(UIConstants.titleFilename + UIConstants.fxmlSuffix));
+        primaryStage.setTitle(UIConstants.windowTitle);
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(false);
         primaryStage.show();

@@ -4,7 +4,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
-import javax.swing.*;
 import java.io.IOException;
 
 public class UIMainMenuController {
@@ -21,8 +20,13 @@ public class UIMainMenuController {
     }
 
     @FXML
-    public void setWorkInProgressScene(ActionEvent event) throws IOException {
-        new SceneLoader().loadScene(UIConstants.analysingFilename + UIConstants.fxmlSuffix, event);
+    public void setLoadEPubScene(ActionEvent event) throws IOException {
+        new SceneLoader().loadScene(UIConstants.loadEPubFilename + UIConstants.fxmlSuffix, event);
+    }
+
+    @FXML
+    public void setReadFromTextFileScene(ActionEvent event) throws IOException {
+        new SceneLoader().loadScene(UIConstants.loadTextFileFilename + UIConstants.fxmlSuffix, event);
     }
 
     @FXML

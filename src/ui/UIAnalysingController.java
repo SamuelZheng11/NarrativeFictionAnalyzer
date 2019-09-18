@@ -26,7 +26,7 @@ public class UIAnalysingController implements NarrativeFictionAsyncCaller, Initi
     public Task<Void> task;
 
     public UIAnalysingController() {
-        task = new NarrativeFictionAsyncWorker(this, SceneCommons.enteredString);
+        task = new NarrativeFictionAsyncWorker(this, SceneCommons.targetDocument);
     }
 
     @Override

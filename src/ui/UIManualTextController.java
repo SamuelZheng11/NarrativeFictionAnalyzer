@@ -15,7 +15,7 @@ public class UIManualTextController {
         if(textArea.getText() == null || textArea.getText().trim().equals("")) {
             return;
         }
-        SceneCommons.enteredString = textArea.getText();
-        new SceneLoader().loadScene(UIConstants.analysingFilename + UIConstants.fxmlSuffix, event);
+        SceneCommons.targetDocument = textArea.getText();
+        SceneCommons.loadAnalyserScreen(event);
     }
 }

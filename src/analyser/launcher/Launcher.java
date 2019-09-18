@@ -79,7 +79,7 @@ public class Launcher {
 		fileStream.close();
 	}
 
-	private static String makeDocumentFromEpub(String fileName) throws IOException {
+	public static String makeDocumentFromEpub(String fileName) throws IOException {
 		EpubReader epubReader = new EpubReader();
 		Book book = epubReader.readEpub(new FileInputStream(fileName));
 		Spine spine = book.getSpine();
@@ -98,7 +98,7 @@ public class Launcher {
 	}
 
 	// construct document from text file, stripping html if it exists.
-	private static String makeDocumentFromTextFile(String fileName) throws FileNotFoundException {
+	public static String makeDocumentFromTextFile(String fileName) throws FileNotFoundException {
         String document = "";
         BufferedReader file = new BufferedReader(new FileReader(fileName));
 
