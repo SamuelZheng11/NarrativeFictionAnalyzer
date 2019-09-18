@@ -6,9 +6,9 @@ import java.util.Set;
 
 public class Location implements ModelObject, Serializable {
     private String name;
-    private Set<Relationship> relationshipSet = new HashSet<Relationship>();
-    private Set<Scene> sceneAppearances = new HashSet<Scene>();
-    private Set<String> modifiers = new HashSet<String>();
+    private transient Set<Relationship> relationshipSet = new HashSet<Relationship>();
+    private transient Set<Scene> sceneAppearances = new HashSet<Scene>();
+    private Set<Modifier> modifiers = new HashSet<Modifier>();
 
     public Location(String name) {
         this.name = name;
@@ -22,7 +22,7 @@ public class Location implements ModelObject, Serializable {
         this.sceneAppearances.add(scene);
     }
 
-    public void addModifier(String modifier) {
+    public void addModifier(Modifier modifier) {
         this.modifiers.add(modifier);
     }
 
@@ -38,7 +38,7 @@ public class Location implements ModelObject, Serializable {
         return sceneAppearances;
     }
 
-    public Set<String> getModifiers() {
+    public Set<Modifier> getModifiers() {
         return modifiers;
     }
 }

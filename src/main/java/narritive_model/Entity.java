@@ -8,9 +8,9 @@ public class Entity implements ModelObject, Serializable {
     private String name;
     private String gender;
     private Set<String> aliases = new HashSet<String>();
-    private Set<Relationship> relationshipSet = new HashSet<Relationship>();
-    private Set<Scene> sceneAppearances = new HashSet<Scene>();
-    private Set<String> modifiers = new HashSet<String>();
+    private transient Set<Relationship> relationshipSet = new HashSet<Relationship>();
+    private transient Set<Scene> sceneAppearances = new HashSet<Scene>();
+    private transient Set<Modifier> modifiers = new HashSet<Modifier>();
     private Long linesOfDialogue = new Long(0);
 
     public Entity(String name, String gender) {
@@ -38,11 +38,11 @@ public class Entity implements ModelObject, Serializable {
         this.sceneAppearances.add(scene);
     }
 
-    public void addModifier(String modifier) {
+    public void addModifier(Modifier modifier) {
         this.modifiers.add(modifier);
     }
 
-    public Set<String> getModifiers() {
+    public Set<Modifier> getModifiers() {
         return modifiers;
     }
 

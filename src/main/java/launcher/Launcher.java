@@ -1,5 +1,7 @@
 package launcher;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import narritive_model.Model;
@@ -34,7 +36,6 @@ public class Launcher {
 
         LocalDateTime time = LocalDateTime.now();
 
-
 		//Document text to be parsed in can be sourced from a local variable, makeDocumentFromTextfile, or makeDocumentFromEpub
 		Model model = analyseDocument(documentText);
 
@@ -51,6 +52,7 @@ public class Launcher {
 		finish = finish.minusSeconds(time.getSecondOfMinute());
 		finish = finish.minusHours(time.getHourOfDay());
 		finish = finish.minusMinutes(time.getMinuteOfHour());
+		convertModelToJSON(model);
 		System.out.println(finish.getHourOfDay() + "hours: " + finish.getMinuteOfHour() + "minutes: "+ finish.getSecondOfMinute() + "seconds");
 	}
 
@@ -170,5 +172,11 @@ public class Launcher {
 		}
 		paragraphs.add(previousChunk);
     	return paragraphs;
+	}
+
+	private static String convertModelToJSON(Model model){
+		Gson gson = new GsonBuilder().create();
+		String json = gson.toJson(model);
+		return json;
 	}
 }
