@@ -60,7 +60,7 @@ public class Launcher {
 		return model;
 	}
 
-	private static Model loadModel(String filename) throws IOException, ClassNotFoundException {
+	public static Model loadModel(String filename) throws IOException, ClassNotFoundException {
     	FileInputStream fileStream = new FileInputStream(filename);
     	ObjectInputStream objectStream = new ObjectInputStream(fileStream);
     	Model model = (Model) objectStream.readObject();
@@ -69,7 +69,7 @@ public class Launcher {
     	return model;
 	}
 
-	private static void saveModel(Model model, String filename) throws IOException {
+	public static void saveModel(Model model, String filename) throws IOException {
 		FileOutputStream fileStream = new FileOutputStream(filename);
 		ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
 		objectStream.writeObject(model);
@@ -178,8 +178,8 @@ public class Launcher {
     	return paragraphs;
 	}
 
-	private static String convertModelToJSON(Model model){
-		Gson gson = new GsonBuilder().create();
+	public static String convertModelToJSON(Model model){
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String json = gson.toJson(model);
 		return json;
 	}

@@ -34,6 +34,7 @@
                   <Font size="16.0" />
                </font>
             </Text>
+            <Button fx:id="readFromFileButton1" layoutX="94.0" layoutY="418.0" mnemonicParsing="false" onAction="#setLoadModelScene" prefHeight="50.0" prefWidth="300.0" text="Load model" />
          </children>
       </AnchorPane>
    </children>

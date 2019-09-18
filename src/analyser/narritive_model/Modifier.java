@@ -1,5 +1,4 @@
-package narritive_model;
-
+package analyser.narritive_model;
 
 public class Modifier {
 
