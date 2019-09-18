@@ -1,15 +1,16 @@
 package analyser.narritive_model;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Entity implements ModelObject {
+public class Entity implements ModelObject, Serializable {
     private String name;
     private String gender;
     private Set<String> aliases = new HashSet<String>();
-    private Set<Relationship> relationshipSet = new HashSet<Relationship>();
-    private Set<Scene> sceneAppearances = new HashSet<Scene>();
-    private Set<String> modifiers = new HashSet<String>();
+    private transient Set<Relationship> relationshipSet = new HashSet<Relationship>();
+    private transient Set<Scene> sceneAppearances = new HashSet<Scene>();
+    private transient Set<Modifier> modifiers = new HashSet<Modifier>();
     private Long linesOfDialogue = new Long(0);
 
     public Entity(String name, String gender) {
@@ -37,8 +38,16 @@ public class Entity implements ModelObject {
         this.sceneAppearances.add(scene);
     }
 
-    public void addModifier(String modifier) {
+    public void addModifier(Modifier modifier) {
         this.modifiers.add(modifier);
+    }
+
+    public Set<Modifier> getModifiers() {
+        return modifiers;
+    }
+
+    public Long getLinesOfDialogue() {
+        return linesOfDialogue;
     }
 
     public String getGender() { return this.gender; }
