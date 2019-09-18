@@ -5,8 +5,8 @@ import java.util.Set;
 
 public class Location implements ModelObject {
     private String name;
-    private Set<Relationship> relationshipSet = new HashSet<Relationship>();
-    private Set<Scene> sceneAppearances = new HashSet<Scene>();
+    private transient Set<Relationship> relationshipSet = new HashSet<Relationship>();
+    private transient Set<Scene> sceneAppearances = new HashSet<Scene>();
     private Set<Modifier> modifiers = new HashSet<Modifier>();
 
     public Location(String name) {
