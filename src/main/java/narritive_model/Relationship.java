@@ -1,6 +1,8 @@
 package narritive_model;
 
-public class Relationship {
+import java.io.Serializable;
+
+public class Relationship implements Serializable {
     private ModelObject subjectModelObject;
     private ModelObject objectModelObject;
     private ModelObject usingModelObject;

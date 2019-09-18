@@ -1,6 +1,8 @@
 package narritive_model;
 
-public class BookLocation {
+import java.io.Serializable;
+
+public class BookLocation implements Serializable {
 
     private int _segmentIndex;
     private int _sentenceIndex;

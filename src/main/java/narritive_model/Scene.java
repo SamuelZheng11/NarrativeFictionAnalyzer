@@ -1,9 +1,10 @@
 package narritive_model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Scene {
+public class Scene implements Serializable {
     private Map<String, Location> sceneLocations = new HashMap<String, Location>();
     private Map<String, Entity> sceneEntities = new HashMap<String, Entity>();
     private BookLocation sceneBeginning;
