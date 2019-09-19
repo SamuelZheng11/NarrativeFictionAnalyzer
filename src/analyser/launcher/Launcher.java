@@ -1,11 +1,11 @@
-package launcher;
+package analyser.launcher;
 
+import analyser.narritive_model.Model;
+import analyser.narritive_processing.Analyser;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import narritive_model.Model;
-import narritive_processing.Analyser;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.Spine;
@@ -34,10 +34,13 @@ public class Launcher {
     
     public static void main(String[] args) {
 
-        LocalDateTime time = LocalDateTime.now();
+		new Launcher().Start("Dorothy is a girl.");
+	}
 
-		//Document text to be parsed in can be sourced from a local variable, makeDocumentFromTextfile, or makeDocumentFromEpub
-		Model model = analyseDocument(documentText);
+	public Model Start(String paragraph) {
+		LocalDateTime time = LocalDateTime.now();
+
+		Model model = analyseDocument(paragraph);
 
 		//save model
 		String filename = DEFUALT_MODEL_DIRECTORY + DEFUALT_MODEL_NAME;
@@ -54,9 +57,10 @@ public class Launcher {
 		finish = finish.minusMinutes(time.getMinuteOfHour());
 		convertModelToJSON(model);
 		System.out.println(finish.getHourOfDay() + "hours: " + finish.getMinuteOfHour() + "minutes: "+ finish.getSecondOfMinute() + "seconds");
+		return model;
 	}
 
-	private static Model loadModel(String filename) throws IOException, ClassNotFoundException {
+	public static Model loadModel(String filename) throws IOException, ClassNotFoundException {
     	FileInputStream fileStream = new FileInputStream(filename);
     	ObjectInputStream objectStream = new ObjectInputStream(fileStream);
     	Model model = (Model) objectStream.readObject();
@@ -65,7 +69,7 @@ public class Launcher {
     	return model;
 	}
 
-	private static void saveModel(Model model, String filename) throws IOException {
+	public static void saveModel(Model model, String filename) throws IOException {
 		FileOutputStream fileStream = new FileOutputStream(filename);
 		ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
 		objectStream.writeObject(model);
@@ -75,7 +79,7 @@ public class Launcher {
 		fileStream.close();
 	}
 
-	private static String makeDocumentFromEpub(String fileName) throws IOException {
+	public static String makeDocumentFromEpub(String fileName) throws IOException {
 		EpubReader epubReader = new EpubReader();
 		Book book = epubReader.readEpub(new FileInputStream(fileName));
 		Spine spine = book.getSpine();
@@ -94,7 +98,7 @@ public class Launcher {
 	}
 
 	// construct document from text file, stripping html if it exists.
-	private static String makeDocumentFromTextFile(String fileName) throws FileNotFoundException {
+	public static String makeDocumentFromTextFile(String fileName) throws FileNotFoundException {
         String document = "";
         BufferedReader file = new BufferedReader(new FileReader(fileName));
 
@@ -174,8 +178,8 @@ public class Launcher {
     	return paragraphs;
 	}
 
-	private static String convertModelToJSON(Model model){
-		Gson gson = new GsonBuilder().create();
+	public static String convertModelToJSON(Model model){
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String json = gson.toJson(model);
 		return json;
 	}

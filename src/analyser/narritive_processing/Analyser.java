@@ -1,5 +1,6 @@
-package narritive_processing;
+package analyser.narritive_processing;
 
+import analyser.narritive_model.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -7,7 +8,6 @@ import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import narritive_model.*;
 
 import java.util.*;
 
