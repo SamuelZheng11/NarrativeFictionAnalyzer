@@ -10,7 +10,7 @@ public class Entity implements ModelObject, Serializable {
     private Set<String> aliases = new HashSet<String>();
     private transient Set<Relationship> relationshipSet = new HashSet<Relationship>();
     private transient Set<Scene> sceneAppearances = new HashSet<Scene>();
-    private transient Set<Modifier> modifiers = new HashSet<Modifier>();
+    private Set<Modifier> modifiers = new HashSet<Modifier>();
     private Long linesOfDialogue = new Long(0);
 
     public Entity(String name, String gender) {
