@@ -1,6 +1,8 @@
 package analyser.narritive_model;
 
-public class Modifier {
+import java.io.Serializable;
+
+public class Modifier implements Serializable {
 
 	private String _description;
 	private BookLocation _location;
