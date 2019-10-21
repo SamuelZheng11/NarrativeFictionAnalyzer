@@ -42,3 +42,6 @@ Host source files for Alex and Sam's fourth year research project at the Faculty
   
 # Software Documentation
 Please refer to the GitHub Wiki
+
+# Project Disclaimer
+Project is built on top of CoreNLP an NLP library, we do not own CoreNLP, it can be found here: https://stanfordnlp.github.io/CoreNLP/
